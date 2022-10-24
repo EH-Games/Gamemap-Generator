@@ -1,0 +1,326 @@
+package com.ehgames.util;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+
+public final class LWJGL implements GL {
+
+	@Override
+	public boolean isCoreProfile() {
+		//GL11.glGet
+		return false;
+	}
+
+	@Override
+	public void begin(int mode) {
+		GL11.glBegin(mode);
+	}
+
+	@Override
+	public void end() {
+		GL11.glEnd();
+	}
+
+	@Override
+	public void vertex2s(short x, short y) {
+		// XXX doing this for now because missing method afaict.
+		// this is one of those cases of LWJGL devs trying to be smarter than end users and providing 90% of a spec isn't it?
+		GL11.glVertex2i(x, y);
+	}
+
+	@Override
+	public void vertex2i(int x, int y) {
+		GL11.glVertex2i(x, y);
+	}
+
+	@Override
+	public void vertex2f(float x, float y) {
+		GL11.glVertex2f(x, y);
+	}
+
+	@Override
+	public void vertex3f(float x, float y, float z) {
+		GL11.glVertex3f(x, y, z);
+	}
+
+	@Override
+	public void texCoord2f(float u, float v) {
+		GL11.glTexCoord2f(u, v);
+	}
+
+	@Override
+	public void normal3f(float x, float y, float z) {
+		GL11.glNormal3f(x, y, z);
+	}
+
+	@Override
+	public void color3f(float red, float green, float blue) {
+		GL11.glColor3f(red, green, blue);
+	}
+
+	@Override
+	public void color4f(float red, float green, float blue, float alpha) {
+		GL11.glColor4f(red, green, blue, alpha);
+	}
+
+	@Override
+	public void color3ub(byte red, byte green, byte blue) {
+		GL11.glColor3ub(red, green, blue);
+	}
+
+	@Override
+	public void color4ub(byte red, byte green, byte blue, byte alpha) {
+		GL11.glColor4ub(red, green, blue, alpha);
+	}
+
+	@Override
+	public void vertexAttrib1f(int index, float v0) {
+		GL20.glVertexAttrib1f(index, v0);
+	}
+
+	@Override
+	public void vertexAttrib2f(int index, float v0, float v1) {
+		GL20.glVertexAttrib2f(index, v0, v1);
+	}
+
+	@Override
+	public void vertexAttrib3f(int index, float v0, float v1, float v2) {
+		GL20.glVertexAttrib3f(index, v0, v1, v2);
+	}
+
+	@Override
+	public void vertexAttrib4f(int index, float v0, float v1, float v2, float v3) {
+		GL20.glVertexAttrib4f(index, v0, v1, v2, v3);
+	}
+
+	@Override
+	public void vertexAttrib2s(int index, short v0, short v1) {
+		GL20.glVertexAttrib2s(index, v0, v1);
+	}
+
+	@Override
+	public void vertexPointer(int size, int type, int stride, ByteBuffer pointer) {
+		GL11.glVertexPointer(size, type, stride, pointer);
+	}
+
+	@Override
+	public void vertexPointer(int size, int type, int stride, int offset) {
+		// using int rather than long because I'd like to hear of a use case where you need more than a 2gb offset for your attributes
+		GL11.glVertexPointer(size, type, stride, offset);
+	}
+
+	@Override
+	public void texCoordPointer(int size, int type, int stride, ByteBuffer pointer) {
+		GL11.glTexCoordPointer(size, type, stride, pointer);
+	}
+
+	@Override
+	public void texCoordPointer(int size, int type, int stride, int offset) {
+		GL11.glTexCoordPointer(size, type, stride, offset);
+	}
+
+	@Override
+	public void colorPointer(int size, int type, int stride, ByteBuffer pointer) {
+		GL11.glColorPointer(size, type, stride, pointer);
+	}
+
+	@Override
+	public void colorPointer(int size, int type, int stride, int offset) {
+		GL11.glColorPointer(size, type, stride, offset);
+	}
+
+	@Override
+	public void normalPointer(int type, int stride, ByteBuffer pointer) {
+		GL11.glNormalPointer(type, stride, pointer);
+	}
+
+	@Override
+	public void normalPointer(int type, int stride, int offset) {
+		GL11.glNormalPointer(type, stride, offset);
+	}
+
+	@Override
+	public void vertexAttribPointer(int index, int size, int type, boolean normalized, int stride, ByteBuffer pointer) {
+		GL20.glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+	}
+
+	@Override
+	public void vertexAttribPointer(int index, int size, int type, boolean normalized, int stride, int offset) {
+		GL20.glVertexAttribPointer(index, size, type, normalized, stride, offset);
+	}
+
+	@Override
+	public void bindAttribLocation(int program, int index, String name) {
+		GL20.glBindAttribLocation(program, index, name);
+	}
+
+	@Override
+	public int getAttribLocation(int program, String name) {
+		return GL20.glGetAttribLocation(program, name);
+	}
+
+	@Override
+	public void pushMatrix() {
+		GL11.glPushMatrix();
+	}
+
+	@Override
+	public void popMatrix() {
+		GL11.glPopMatrix();
+	}
+
+	@Override
+	public void translatef(float x, float y, float z) {
+		GL11.glTranslatef(x, y, z);
+	}
+
+	@Override
+	public void multMatrixf(FloatBuffer matrix) {
+		GL11.glMultMatrix(matrix);
+	}
+
+	@Override
+	public void loadMatrixf(FloatBuffer matrix) {
+		GL11.glLoadMatrix(matrix);
+	}
+
+	@Override
+	public void drawArrays(int mode, int first, int count) {
+		GL11.glDrawArrays(mode, first, count);
+	}
+
+	@Override
+	public void drawElements(int mode, int count, int type, ByteBuffer indices) {
+		GL11.glDrawElements(mode, count, type, indices);
+	}
+
+	@Override
+	public void drawElements(int mode, int count, int type, int offset) {
+		GL11.glDrawElements(mode, count, type, offset);
+	}
+
+	@Override
+	public void bindTexture(int target, int texture) {
+		GL11.glBindTexture(target, texture);
+	}
+
+	@Override
+	public int genTexture() {
+		return GL11.glGenTextures();
+	}
+
+	@Override
+	public void texImage2D(int target, int level, int internalFormat, int width, int height, int border, int format, int type, ByteBuffer data) {
+		GL11.glTexImage2D(target, level, internalFormat, width, height, border, format, type, data);
+	}
+
+	@Override
+	public void compressedTexImage2D(int target, int level, int internalFormat, int width, int height, int border, ByteBuffer data) {
+		GL13.glCompressedTexImage2D(target, level, internalFormat, width, height, border, data);
+	}
+
+	@Override
+	public void texParameterf(int target, int pname, int param) {
+		GL11.glTexParameterf(target, pname, param);
+	}
+
+	@Override
+	public void texParameteri(int target, int pname, int param) {
+		GL11.glTexParameteri(target, pname, param);
+	}
+
+	@Override
+	public void deleteTexture(int texture) {
+		GL11.glDeleteTextures(texture);
+	}
+
+	@Override
+	public int genBuffer() {
+		return GL15.glGenBuffers();
+	}
+
+	@Override
+	public void deleteBuffer(int buffer) {
+		GL15.glDeleteBuffers(buffer);
+	}
+
+	@Override
+	public void bindBuffer(int target, int buffer) {
+		GL15.glBindBuffer(target, buffer);
+	}
+
+	@Override
+	public void bufferData(int target, ByteBuffer data, int usage) {
+		GL15.glBufferData(target, data, usage);
+	}
+
+	@Override
+	public void bufferSubData(int target, int offset, ByteBuffer data) {
+		GL15.glBufferSubData(target, offset, data);
+	}
+
+	@Override
+	public int createShader(int shaderType) {
+		return GL20.glCreateShader(shaderType);
+	}
+
+	@Override
+	public void shaderSource(int shader, String source) {
+		GL20.glShaderSource(shader, source);
+	}
+
+	@Override
+	public void attachShader(int program, int shader) {
+		GL20.glAttachShader(program, shader);
+	}
+
+	@Override
+	public void detachShader(int program, int shader) {
+		GL20.glDetachShader(program, shader);
+	}
+
+	@Override
+	public void compileShader(int shader) {
+		GL20.glCompileShader(shader);
+	}
+
+	@Override
+	public String getShaderInfoLog(int shader) {
+		return GL20.glGetShaderInfoLog(shader, 8192);
+	}
+	
+	@Override
+	public void deleteShader(int shader) {
+		GL20.glDeleteShader(shader);
+	}
+
+	@Override
+	public int createProgram() {
+		return GL20.glCreateProgram();
+	}
+
+	@Override
+	public void linkProgram(int program) {
+		GL20.glLinkProgram(program);
+	}
+
+	@Override
+	public void validateProgram(int program) {
+		GL20.glValidateProgram(program);
+	}
+
+	@Override
+	public void useProgram(int program) {
+		GL20.glUseProgram(program);
+	}
+
+	@Override
+	public void deleteProgram(int program) {
+		GL20.glDeleteProgram(program);
+	}
+}
