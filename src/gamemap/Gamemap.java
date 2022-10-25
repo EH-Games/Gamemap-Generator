@@ -2,21 +2,41 @@ package gamemap;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.concurrent.CompletableFuture;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileFilter;
 
 import org.lwjgl.LWJGLException;
 
 public class Gamemap {
-	public static final String	APP_NAME	= "Gamemap Generator 1.0.0";
+	public static final String				APP_NAME		= "Gamemap Generator 1.0.0";
 
-	private static Frame		frame;
-	private static GMCanvas		canvas;
+	private static Frame					frame;
+	private static GMCanvas					canvas;
 
-	public static Viewer		viewer		= new Viewer();
-	public static World			activeWorld	= null;
-	
-	private static int			mouseX, mouseY;
+	public static Viewer					viewer			= new Viewer();
+	public static World						activeWorld		= null;
+
+	private static Map<FileFilter, Plugin>	pluginsByFilter	= new HashMap<>();
+	private static JFileChooser				fileChooser		= new JFileChooser();
+
+	private static int						mouseX, mouseY;
 
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch(UnsupportedLookAndFeelException | ReflectiveOperationException e) {}
+		
+		loadPlugins();
+		
 		EventQueue.invokeLater(() -> {
 			try {
 				frame = createFrame();
@@ -26,6 +46,31 @@ public class Gamemap {
 				e.printStackTrace();
 			}
 		});
+	}
+	
+	private static void loadPlugins() {
+		// FIXME probably need to add in a class loader that loads all jars in a folder
+		ServiceLoader<Plugin> loader =  ServiceLoader.load(Plugin.class);
+		int loadedCount = 0;
+		for(Plugin plugin : loader) {
+			boolean loaded = false;
+			try {
+				FileFilter[] filters = plugin.getFileFilters();
+				if(filters != null) {
+					for(FileFilter filter : filters) {
+						if(filter != null) {
+							pluginsByFilter.put(filter, plugin);
+							loaded = true;
+						}
+					}
+				}
+			} catch(Throwable t) {}
+			if(loaded) loadedCount++;
+		}
+		
+		StringBuilder str = new StringBuilder("Loaded ").append(loadedCount).append(" plugin");
+		if(loadedCount != 1) str.append('s');
+		System.out.println(str);
 	}
 
 	private static Frame createFrame() throws LWJGLException {
@@ -107,7 +152,7 @@ public class Gamemap {
 		MenuBar menus = new MenuBar();
 
 		Menu file = new Menu("File");
-		createMenuItem("Open Game World...", file);
+		createMenuItem("Open Game World...", file).addActionListener(e -> showFileChooser());
 		createMenuItem("Render Map", file);
 		file.addSeparator();
 		createMenuItem("Exit", file).addActionListener(e -> attemptToExit());
@@ -129,6 +174,77 @@ public class Gamemap {
 		menus.add(view);
 
 		return menus;
+	}
+	
+	private static class PluginWorlds {
+		Plugin		plugin;
+		String[]	worldNames;
+		String		selected;
+	}
+
+	private static PluginWorlds getPluginForFile(File file) {
+		for(Map.Entry<FileFilter, Plugin> entry : pluginsByFilter.entrySet()) {
+			if(entry.getKey().accept(file)) {
+				Plugin polledPlugin = entry.getValue();
+				try {
+					String[] names = polledPlugin.getWorldList(file);
+					if(names != null && names.length > 0) {
+						PluginWorlds worlds = new PluginWorlds();
+						worlds.plugin = polledPlugin;
+						worlds.worldNames = names;
+						return worlds;
+					}
+				} catch(Throwable t) {}
+			}
+		}
+		return null;
+	}
+	
+	private static void showFileChooser() {
+		if(pluginsByFilter.isEmpty()) {
+			JOptionPane.showMessageDialog(frame, "You don't have any plugins to load things with!",
+					"No Plugins", JOptionPane.ERROR_MESSAGE);
+		} else {
+			int result = fileChooser.showOpenDialog(frame);
+			if(result == JFileChooser.APPROVE_OPTION) {
+				// TODO disable loading buttons
+				final File file = fileChooser.getSelectedFile();
+				CompletableFuture.supplyAsync(() -> getPluginForFile(file)).thenApplyAsync(worlds -> {
+					if(worlds == null) {
+						JOptionPane.showMessageDialog(frame, "No plugins found that support this file",
+								"Unsupported File", JOptionPane.ERROR_MESSAGE);
+						return null;
+					} else {
+						if(worlds.worldNames.length > 1) {
+							Object selection = JOptionPane.showInputDialog(frame,
+									"Select world to load", "Select World", JOptionPane.PLAIN_MESSAGE,
+									null, worlds.worldNames, worlds.worldNames[0]);
+							if(selection != null) worlds.selected = selection.toString();
+						} else {
+							worlds.selected = worlds.worldNames[0];
+						}
+						return worlds;
+					}
+				}).thenAcceptAsync(worlds -> {
+					if(worlds != null) {
+						try {
+							World world = worlds.plugin.loadWorld(file, worlds.selected);
+							if(world == null) {
+								JOptionPane.showMessageDialog(frame, "Plugin \"" + 
+										worlds.plugin.getName() + "\" did not return a gameworld");
+							} else {
+								// TODO set world
+							}
+						} catch(Exception e) {
+							JOptionPane.showMessageDialog(frame, "Plugin \"" +
+									worlds.plugin.getName() +
+									"\" threw an exception creating a gameworld:\n" + e.toString());
+						}
+					}
+					// TODO reenable loading buttons 
+				});
+			}
+		}
 	}
 
 	private static void attemptToExit() {

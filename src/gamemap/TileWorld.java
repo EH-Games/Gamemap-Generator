@@ -1,13 +1,14 @@
 package gamemap;
 
-public abstract class TileWorld implements World {
-	public final Type getType() {
-		return Type.TileBased;
+public final class TileWorld extends World {
+	public int tilesX;
+	public int tilesY;
+	public float tileWidth;
+	public float tileHeight;
+	
+	@Override
+	public void render(Camera camera) {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public abstract int getTilesX();
-	
-	public abstract int getTilesY();
-	
-	public abstract int getTileSize();
 }

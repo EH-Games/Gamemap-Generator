@@ -58,7 +58,17 @@ public class AABB {
 		maxZ = Math.max(maxZ, other.maxZ);
 	}
 	
-	public boolean contains2D(Vec3 point) {
+	public void add(Vec3 p) {
+		minX = Math.min(minX, p.x);
+		minY = Math.min(minY, p.y);
+		minZ = Math.min(minZ, p.z);
+		
+		maxX = Math.max(maxX, p.x);
+		maxY = Math.max(maxY, p.y);
+		maxZ = Math.max(maxZ, p.z);
+	}
+	
+	public boolean contains2d(Vec3 point) {
 		return
 				point.x >= minX && point.x <= maxX &&
 				point.y >= minY && point.y <= maxY;

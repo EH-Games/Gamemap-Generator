@@ -18,8 +18,30 @@ public class WorldGroup extends WorldObject {
 				obj.recalculateBounds();
 				bounds.add(obj.bounds);
 			}
-			// TODO set bounds from first item
-			// TODO update bounds
+		}
+	}
+
+	@Override
+	public void testVisibility(Camera camera) {
+		if(camera.bounds.intersects(bounds)) {
+			visibilityFlags |= camera.cameraFlag;
+			for(WorldObject obj : objects) {
+				obj.testVisibility(camera);
+			}
+		} else {
+			visibilityFlags &= ~camera.cameraFlag;
+		}
+	}
+	
+	@Override
+	public void testVisibility2d(Camera camera) {
+		if(camera.bounds.intersects2d(bounds)) {
+			visibilityFlags |= camera.cameraFlag;
+			for(WorldObject obj : objects) {
+				obj.testVisibility2d(camera);
+			}
+		} else {
+			visibilityFlags &= ~camera.cameraFlag;
 		}
 	}
 }

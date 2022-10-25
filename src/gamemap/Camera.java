@@ -4,35 +4,63 @@ import com.ehgames.util.AABB;
 import com.ehgames.util.Vec3;
 
 public class Camera {
-	Vec3	position	= new Vec3();
-	AABB	viewBounds	= new AABB();
+	Vec3			position		= new Vec3();
+	AABB			bounds			= new AABB();
+
+	float			nearClip		= 0.1f;
+	float			farClip			= 1000;
+	float			nearClipSq		= 0.01f;
+	float			farClipSq		= 1000_000;
+	boolean			perspective		= false;
+	float			fovY;
+
+	private Vec3[]	frustumPoints	= new Vec3[8];
 	
-	float	nearClip	= 0.1f;
-	float	farClip		= 1000;
-	boolean	perspective	= false;
-	float	fovY;
-	
+	float			halfWidth;
+	float			halfHeight;
+
 	/** internal flag used for marking objects as visible */
-	int		cameraFlag;
-	
+	int				cameraFlag;
+
 	/** a single bit indicating which area should be rendered */
-	int		areaFlag;
-	
-	int		time;
-	
+	int				areaFlag;
+
+	int				time;
+
 	void copyWorldProperties(Camera camera) {
 		areaFlag = camera.areaFlag;
+		time = camera.time;
 	}
-	
+
 	void copyCameraProperties(Camera camera) {
 		fovY = camera.fovY;
 		nearClip = camera.nearClip;
 		farClip = camera.farClip;
 		perspective = camera.perspective;
+		
+		halfWidth = camera.halfWidth;
+		halfHeight = camera.halfHeight;
 	}
 	
 	void calculateBounds() {
-		// TODO implement
-		
+		if(perspective) {
+			// TODO implement
+			// build frustum from near clip, far clip & fov(along with matrix)
+			// above can be cached and only updaed when needed
+			bounds.prepForBuild();
+			Vec3 transformed = new Vec3();
+			for(Vec3 fp : frustumPoints) {
+				// rotate point using pitch and yaw
+				transformed.addInPlace(position);
+				bounds.add(transformed);
+			}
+		} else {
+			// min and max z assumed to already be set to
+			// user-defined minimum and maximum values
+			bounds.minX = position.x - halfWidth;
+			bounds.maxX = position.x + halfWidth;
+			bounds.maxY = position.y + halfHeight;
+			bounds.minY = position.y - halfHeight;
+		}
 	}
 }
