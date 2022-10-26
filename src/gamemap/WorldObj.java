@@ -2,7 +2,7 @@ package gamemap;
 
 import com.ehgames.util.AABB;
 
-public abstract class WorldObject {
+public abstract class WorldObj {
 	/** The bounds of this object, used for culling */
 	public final AABB	bounds	= new AABB();
 

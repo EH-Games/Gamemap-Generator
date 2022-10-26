@@ -3,7 +3,7 @@ package gamemap;
 import com.ehgames.util.Vec3;
 
 /** A renderable item within the world. */
-public class WorldItem extends WorldObject {
+public class WorldItem extends WorldObj {
 	public final Vec3	position	= new Vec3();
 	public Object		renderer;
 	/** Earliest time this object is visible (inclusive) */
@@ -21,7 +21,8 @@ public class WorldItem extends WorldObject {
 	 * Layer this object is in. Generally used for alpha ordering.<br>
 	 * First all objects either without transparency or with 
 	 * nearest-sampled, bitmask transparency are rendered lowest layer to highest layer.<br>
-	 * Then all objects with transparency that are either linear sampled or have
+	 * Then all objects with transparency that are either linear sampled or
+	 * are translucent are rendered lowest layer to highest layer.<br>
 	 */ 
 	public int		layer;
 	
@@ -29,6 +30,9 @@ public class WorldItem extends WorldObject {
 	public float	minDistSq;
 	/** The furthest distance this item is visible, squared for comparison */
 	public float	maxDistSq;
+	
+	public boolean	isTrasparent;
+	public boolean	isOpaque;
 	
 	@Override
 	public void recalculateBounds() {}

@@ -32,7 +32,9 @@ public interface Plugin {
 	public String[] getWorldList(File file);
 	
 	/**
-	 * Creates a world object from the file specified if possible
+	 * Creates a world object from the file specified if possible.<br>
+	 * All objects in the world should be present immediately,
+	 * however graphical resources for them may be left unloaded until actually needed. 
 	 * @param file The user-selected file that has been accepted by one of this plugin's FileFilters
 	 * @param worldName The name of the world selected by the user
 	 * from the list returned by {@link #getWorldList(File)}

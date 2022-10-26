@@ -26,7 +26,7 @@ public class Gamemap {
 	public static World						activeWorld		= null;
 
 	private static Map<FileFilter, Plugin>	pluginsByFilter	= new HashMap<>();
-	private static JFileChooser				fileChooser		= new JFileChooser();
+	private static JFileChooser				fileChooser;
 
 	private static int						mouseX, mouseY;
 
@@ -35,6 +35,8 @@ public class Gamemap {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch(UnsupportedLookAndFeelException | ReflectiveOperationException e) {}
 		
+		// needs to come here so it gets l&f set
+		fileChooser = new JFileChooser();
 		loadPlugins();
 		
 		EventQueue.invokeLater(() -> {
@@ -49,8 +51,8 @@ public class Gamemap {
 	}
 	
 	private static void loadPlugins() {
-		// FIXME probably need to add in a class loader that loads all jars in a folder
-		ServiceLoader<Plugin> loader =  ServiceLoader.load(Plugin.class);
+		ServiceLoader<Plugin> loader =  ServiceLoader.load(
+				Plugin.class, new PluginClassLoader());
 		int loadedCount = 0;
 		for(Plugin plugin : loader) {
 			boolean loaded = false;
@@ -60,6 +62,7 @@ public class Gamemap {
 					for(FileFilter filter : filters) {
 						if(filter != null) {
 							pluginsByFilter.put(filter, plugin);
+							fileChooser.addChoosableFileFilter(filter);
 							loaded = true;
 						}
 					}
@@ -159,7 +162,7 @@ public class Gamemap {
 		menus.add(file);
 
 		Menu view = new Menu("View");
-		CheckboxMenuItem ortho = new CheckboxMenuItem("Orthogonal", viewer.orthogonal);
+		CheckboxMenuItem ortho = new CheckboxMenuItem("Topdown View", viewer.orthogonal);
 		ortho.addItemListener(e -> {
 			viewer.orthogonal = ortho.getState();
 			canvas.repaint();
@@ -209,6 +212,7 @@ public class Gamemap {
 			if(result == JFileChooser.APPROVE_OPTION) {
 				// TODO disable loading buttons
 				final File file = fileChooser.getSelectedFile();
+				// TODO save directory to a config file
 				CompletableFuture.supplyAsync(() -> getPluginForFile(file)).thenApplyAsync(worlds -> {
 					if(worlds == null) {
 						JOptionPane.showMessageDialog(frame, "No plugins found that support this file",
@@ -231,14 +235,16 @@ public class Gamemap {
 							World world = worlds.plugin.loadWorld(file, worlds.selected);
 							if(world == null) {
 								JOptionPane.showMessageDialog(frame, "Plugin \"" + 
-										worlds.plugin.getName() + "\" did not return a gameworld");
+										worlds.plugin.getName() + "\" did not return a gameworld",
+										"No Gameworld", JOptionPane.ERROR_MESSAGE);
 							} else {
 								// TODO set world
 							}
 						} catch(Exception e) {
 							JOptionPane.showMessageDialog(frame, "Plugin \"" +
 									worlds.plugin.getName() +
-									"\" threw an exception creating a gameworld:\n" + e.toString());
+									"\" threw an exception creating a gameworld:\n" + e.toString(),
+									"Import Exception", JOptionPane.ERROR_MESSAGE);
 						}
 					}
 					// TODO reenable loading buttons 
