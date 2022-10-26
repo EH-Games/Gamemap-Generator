@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** A list of renderable objects within the world */
-public class WorldGroup extends WorldObj {
+public final class WorldGroup extends WorldObj {
 	public List<WorldObj> objects = new ArrayList<>();
 	
 	/** Recalculate the bounds of this group from that of all child objects */
@@ -18,6 +18,20 @@ public class WorldGroup extends WorldObj {
 				obj.recalculateBounds();
 				bounds.add(obj.bounds);
 			}
+		}
+	}
+	
+	public void recalculateFlags() {
+		areaFlags = 0;
+		transparent = false;
+		opaque = false;
+		for(WorldObj obj : objects) {
+			if(obj instanceof WorldGroup) {
+				((WorldGroup) obj).recalculateFlags();
+			}
+			areaFlags |= obj.areaFlags;
+			transparent |= obj.transparent;
+			opaque |= obj.opaque;
 		}
 	}
 
@@ -46,6 +60,20 @@ public class WorldGroup extends WorldObj {
 	}
 
 	public void render(Camera camera, boolean transparent) {
-		// 
+		if((visibilityFlags & camera.cameraFlag) == 0) return;
+		
+		if(transparent) {
+			for(WorldObj obj : objects) {
+				if(obj.transparent) {
+					obj.render(camera, transparent);
+				}
+			}
+		} else {
+			for(WorldObj obj : objects) {
+				if(obj.transparent) {
+					obj.render(camera, transparent);
+				}
+			}
+		}
 	}
 }

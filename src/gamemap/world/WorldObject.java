@@ -3,7 +3,7 @@ package gamemap.world;
 import com.ehgames.util.Vec3;
 
 /** A renderable item within the world. */
-public class WorldItem extends WorldObj {
+public class WorldObject extends WorldObj {
 	public final Vec3	position	= new Vec3();
 	public Object		renderer;
 	/** Earliest time this object is visible (inclusive) */
