@@ -16,6 +16,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.lwjgl.LWJGLException;
 
+import gamemap.world.Camera;
 import gamemap.world.World;
 
 public class Gamemap {
@@ -23,9 +24,11 @@ public class Gamemap {
 
 	private static Frame					frame;
 	private static GMCanvas					canvas;
+	private static boolean					privelegedCode	= false;
 
 	public static Viewer					viewer			= new Viewer();
-	public static World						activeWorld		= null;
+	static Camera							camera			= new Camera();
+	static World							activeWorld		= null;
 
 	private static Map<FileFilter, Plugin>	pluginsByFilter	= new HashMap<>();
 	private static JFileChooser				fileChooser;
@@ -140,6 +143,15 @@ public class Gamemap {
 
 		return frame;
 	}
+	
+	/**
+	 * Flag to indicate between packages that code is allowed to run.<br>
+	 * This exists so that plugin's can't call internal code
+	 * without having everything in a single package.
+	 */
+	public static boolean isPrivelegedCode() {
+		return privelegedCode;
+	}
 
 	private static Dimension getDefaultCanvasSize() {
 		// TODO determine size based on last window size or check what size works on the current display
@@ -214,7 +226,7 @@ public class Gamemap {
 			if(result == JFileChooser.APPROVE_OPTION) {
 				// TODO disable loading buttons
 				final File file = fileChooser.getSelectedFile();
-				// TODO save directory to a config file
+				// TODO save directory to a config file; alternatively do all config stuff at exit
 				CompletableFuture.supplyAsync(() -> getPluginForFile(file)).thenApplyAsync(worlds -> {
 					if(worlds == null) {
 						JOptionPane.showMessageDialog(frame, "No plugins found that support this file",
@@ -240,7 +252,11 @@ public class Gamemap {
 										worlds.plugin.getName() + "\" did not return a gameworld",
 										"No Gameworld", JOptionPane.ERROR_MESSAGE);
 							} else {
-								// TODO set world
+								privelegedCode = true;
+								camera.onWorldChange(world);
+								privelegedCode = false;
+								activeWorld = world;
+								if(!canvas.activeRendering) canvas.repaint();
 							}
 						} catch(Exception e) {
 							JOptionPane.showMessageDialog(frame, "Plugin \"" +

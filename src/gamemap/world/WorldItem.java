@@ -92,4 +92,8 @@ public class WorldItem extends WorldObj {
 			visibilityFlags &= ~camera.cameraFlag;
 		}
 	}
+	
+	public void render(Camera camera, boolean transparent) {
+		
+	}
 }

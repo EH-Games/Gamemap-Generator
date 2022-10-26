@@ -3,9 +3,11 @@ package gamemap.world;
 import com.ehgames.util.AABB;
 import com.ehgames.util.Vec3;
 
+import gamemap.Gamemap;
+
 public class Camera {
-	Vec3			position		= new Vec3();
-	AABB			bounds			= new AABB();
+	final Vec3		position		= new Vec3();
+	final AABB		bounds			= new AABB();
 
 	float			nearClip		= 0.1f;
 	float			farClip			= 1000;
@@ -26,6 +28,17 @@ public class Camera {
 	int				areaFlag;
 
 	int				time;
+	
+	/** Internal method. do not call */
+	public void onWorldChange(World world) {
+		if(!Gamemap.isPrivelegedCode()) return;
+		
+		position.set(world.initialPos);
+		int area = world.defaultArea;
+		if(area >= world.areaCount) area = 0;
+		areaFlag = 1 << world.defaultArea;
+
+	}
 
 	void copyWorldProperties(Camera camera) {
 		areaFlag = camera.areaFlag;

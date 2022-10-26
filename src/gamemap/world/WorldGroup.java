@@ -44,4 +44,8 @@ public class WorldGroup extends WorldObj {
 			visibilityFlags &= ~camera.cameraFlag;
 		}
 	}
+
+	public void render(Camera camera, boolean transparent) {
+		// 
+	}
 }
