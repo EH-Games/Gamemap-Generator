@@ -15,9 +15,11 @@ public final class World3d extends World {
 		}
 		
 		for(int layer = firstLayer; layer <= lastLayer; layer++) {
+			camera.layerFlag = 1 << firstLayer;
 			root.render(camera, false);
 		}
 		for(int layer = firstLayer; layer <= lastLayer; layer++) {
+			camera.layerFlag = 1 << firstLayer;
 			root.render(camera, true);
 		}
 	}

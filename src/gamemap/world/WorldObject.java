@@ -1,42 +1,39 @@
 package gamemap.world;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.ehgames.util.Vec3;
 
+import gamemap.Model;
+import gamemap.Texture;
+
 /** A renderable item within the world. */
-public class WorldObject extends WorldObj {
-	public final Vec3	position	= new Vec3();
-	public Object		renderer;
+public class WorldObject extends WorldItem {
+	public final Vec3			position	= new Vec3();
+	public Model				model;
+	public Map<String, Texture>	textures	= new HashMap<>();
 	/** Earliest time this object is visible (inclusive) */
-	public int			minTime		= Integer.MIN_VALUE;
+	public int					minTime		= Integer.MIN_VALUE;
 	/** Latest time this object is visible (exclusive) */
-	public int			maxTime		= Integer.MAX_VALUE;
-	/**
-	 * A bitmask indicating in which areas this object is visible.<br>
-	 * For example, a game might use area 0(bit 1) as outdoors,
-	 * higher bits for specific interiors, and a combination of bits
-	 * to represent things visible in multiple of these.
-	 */
-	public int		areaFlags;
+	public int					maxTime		= Integer.MAX_VALUE;
 	/**
 	 * Layer this object is in. Generally used for alpha ordering.<br>
-	 * First all objects either without transparency or with 
-	 * nearest-sampled, bitmask transparency are rendered lowest layer to highest layer.<br>
-	 * Then all objects with transparency that are either linear sampled or
-	 * are translucent are rendered lowest layer to highest layer.<br>
-	 */ 
-	public int		layer;
-	
+	 * First all objects either without transparency or with nearest-sampled,
+	 * bitmask transparency are rendered lowest layer to highest layer.<br>
+	 * Then all objects with transparency that are either linear sampled or are
+	 * translucent are rendered lowest layer to highest layer.<br>
+	 */
+	public int					layer;
+
 	/** The nearest distance this item is visible, squared for comparison */
-	public float	minDistSq;
+	public float				minDistSq;
 	/** The furthest distance this item is visible, squared for comparison */
-	public float	maxDistSq;
-	
-	public boolean	isTrasparent;
-	public boolean	isOpaque;
-	
+	public float				maxDistSq;
+
 	@Override
 	public void recalculateBounds() {}
-	
+
 	private boolean isVisible(Camera camera) {
 		// area test
 		if((camera.areaFlag & areaFlags) == 0) return false;
@@ -94,6 +91,8 @@ public class WorldObject extends WorldObj {
 	}
 	
 	public void render(Camera camera, boolean transparent) {
-		
+		if(model != null) {
+			model.render(transparent, textures);
+		}
 	}
 }

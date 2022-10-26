@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** A list of renderable objects within the world */
-public final class WorldGroup extends WorldObj {
-	public List<WorldObj> objects = new ArrayList<>();
+public final class WorldGroup extends WorldItem {
+	public List<WorldItem> objects = new ArrayList<>();
 	
 	/** Recalculate the bounds of this group from that of all child objects */
 	@Override
@@ -14,7 +14,7 @@ public final class WorldGroup extends WorldObj {
 			bounds.clear();
 		} else {
 			bounds.prepForBuild();
-			for(WorldObj obj : objects) {
+			for(WorldItem obj : objects) {
 				obj.recalculateBounds();
 				bounds.add(obj.bounds);
 			}
@@ -25,7 +25,7 @@ public final class WorldGroup extends WorldObj {
 		areaFlags = 0;
 		transparent = false;
 		opaque = false;
-		for(WorldObj obj : objects) {
+		for(WorldItem obj : objects) {
 			if(obj instanceof WorldGroup) {
 				((WorldGroup) obj).recalculateFlags();
 			}
@@ -39,7 +39,7 @@ public final class WorldGroup extends WorldObj {
 	public void testVisibility(Camera camera) {
 		if(camera.bounds.intersects(bounds)) {
 			visibilityFlags |= camera.cameraFlag;
-			for(WorldObj obj : objects) {
+			for(WorldItem obj : objects) {
 				obj.testVisibility(camera);
 			}
 		} else {
@@ -51,7 +51,7 @@ public final class WorldGroup extends WorldObj {
 	public void testVisibility2d(Camera camera) {
 		if(camera.bounds.intersects2d(bounds)) {
 			visibilityFlags |= camera.cameraFlag;
-			for(WorldObj obj : objects) {
+			for(WorldItem obj : objects) {
 				obj.testVisibility2d(camera);
 			}
 		} else {
@@ -61,15 +61,16 @@ public final class WorldGroup extends WorldObj {
 
 	public void render(Camera camera, boolean transparent) {
 		if((visibilityFlags & camera.cameraFlag) == 0) return;
+		if((layerFlags & camera.layerFlag) == 0) return;
 		
 		if(transparent) {
-			for(WorldObj obj : objects) {
+			for(WorldItem obj : objects) {
 				if(obj.transparent) {
 					obj.render(camera, transparent);
 				}
 			}
 		} else {
-			for(WorldObj obj : objects) {
+			for(WorldItem obj : objects) {
 				if(obj.transparent) {
 					obj.render(camera, transparent);
 				}

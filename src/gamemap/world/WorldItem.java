@@ -2,7 +2,7 @@ package gamemap.world;
 
 import com.ehgames.util.AABB;
 
-public abstract class WorldObj {
+public abstract class WorldItem {
 	/** The bounds of this object, used for culling */
 	public final AABB	bounds	= new AABB();
 
@@ -22,7 +22,7 @@ public abstract class WorldObj {
 	 */
 	public int			areaFlags;
 	
-	WorldObj() {}
+	WorldItem() {}
 
 	public abstract void recalculateBounds();
 	public abstract void testVisibility(Camera camera);

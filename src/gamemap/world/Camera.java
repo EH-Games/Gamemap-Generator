@@ -6,18 +6,18 @@ import com.ehgames.util.Vec3;
 import gamemap.Gamemap;
 
 public class Camera {
-	final Vec3		position		= new Vec3();
-	final AABB		bounds			= new AABB();
+	final Vec3		position			= new Vec3();
+	final AABB		bounds				= new AABB();
 
-	float			nearClip		= 0.1f;
-	float			farClip			= 1000;
-	float			nearClipSq		= 0.01f;
-	float			farClipSq		= 1000_000;
-	boolean			perspective		= false;
+	float			nearClip			= 0.1f;
+	float			farClip				= 1000;
+	float			nearClipSq			= 0.01f;
+	float			farClipSq			= 1000_000;
+	boolean			perspective			= false;
 	float			fovY;
 
-	private Vec3[]	frustumPoints	= new Vec3[8];
-	
+	private Vec3[]	frustumPoints		= new Vec3[8];
+
 	float			halfWidth;
 	float			halfHeight;
 
@@ -27,8 +27,13 @@ public class Camera {
 	/** a single bit indicating which area should be rendered */
 	int				areaFlag;
 
+	/** a single bit indicating which layer should be rendered */
+	int				layerFlag;
+
 	int				time;
-	
+
+	boolean			blockUntilLoaded	= false;
+
 	/** Internal method. do not call */
 	public void onWorldChange(World world) {
 		if(!Gamemap.isPrivelegedCode()) return;
