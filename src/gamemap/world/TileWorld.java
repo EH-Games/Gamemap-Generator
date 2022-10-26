@@ -1,4 +1,4 @@
-package gamemap;
+package gamemap.world;
 
 public final class TileWorld extends World {
 	public int tilesX;

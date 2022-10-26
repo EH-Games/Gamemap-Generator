@@ -1,4 +1,4 @@
-package gamemap;
+package gamemap.world;
 
 import java.util.ArrayList;
 import java.util.List;

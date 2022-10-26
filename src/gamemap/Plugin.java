@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
+import gamemap.world.World;
+
 public interface Plugin {
 	/** Gets a string to be used to identify the plugin in errors displayed to the user */
 	public String getName();

@@ -16,6 +16,8 @@ import javax.swing.filechooser.FileFilter;
 
 import org.lwjgl.LWJGLException;
 
+import gamemap.world.World;
+
 public class Gamemap {
 	public static final String				APP_NAME		= "Gamemap Generator 1.0.0";
 

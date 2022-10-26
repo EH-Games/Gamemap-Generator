@@ -1,4 +1,4 @@
-package gamemap;
+package gamemap.world;
 
 public final class World3d extends World {
 	public final WorldGroup	root		= new WorldGroup();

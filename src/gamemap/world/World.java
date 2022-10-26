@@ -1,4 +1,4 @@
-package gamemap;
+package gamemap.world;
 
 import com.ehgames.util.Vec3;
 
