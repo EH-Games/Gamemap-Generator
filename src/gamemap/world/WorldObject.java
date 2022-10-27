@@ -17,14 +17,6 @@ public class WorldObject extends WorldItem {
 	public int					minTime		= Integer.MIN_VALUE;
 	/** Latest time this object is visible (exclusive) */
 	public int					maxTime		= Integer.MAX_VALUE;
-	/**
-	 * Layer this object is in. Generally used for alpha ordering.<br>
-	 * First all objects either without transparency or with nearest-sampled,
-	 * bitmask transparency are rendered lowest layer to highest layer.<br>
-	 * Then all objects with transparency that are either linear sampled or are
-	 * translucent are rendered lowest layer to highest layer.<br>
-	 */
-	public int					layer;
 
 	/** The nearest distance this item is visible, squared for comparison */
 	public float				minDistSq;
@@ -90,7 +82,11 @@ public class WorldObject extends WorldItem {
 		}
 	}
 	
+	@Override
 	public void render(Camera camera, boolean transparent) {
+		if((visibilityFlags & camera.cameraFlag) == 0) return;
+		if(layerFlags != camera.layerFlag) return;
+		
 		if(model != null) {
 			model.render(transparent, textures);
 		}

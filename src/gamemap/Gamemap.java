@@ -3,6 +3,9 @@ package gamemap;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -16,15 +19,19 @@ import javax.swing.filechooser.FileFilter;
 
 import org.lwjgl.LWJGLException;
 
+import com.google.gson.Gson;
+
 import gamemap.world.Camera;
 import gamemap.world.World;
 
 public class Gamemap {
 	public static final String				APP_NAME		= "Gamemap Generator 1.0.0";
+	private static final Path				CONFIG_FILE		= new File("config.json").toPath();
 
 	private static Frame					frame;
 	private static GMCanvas					canvas;
 	private static boolean					privelegedCode	= false;
+	private static Config					config			= new Config();
 
 	public static Viewer					viewer			= new Viewer();
 	static Camera							camera			= new Camera();
@@ -42,6 +49,8 @@ public class Gamemap {
 		
 		// needs to come here so it gets l&f set
 		fileChooser = new JFileChooser();
+		
+		loadConfig();
 		loadPlugins();
 		
 		EventQueue.invokeLater(() -> {
@@ -53,6 +62,37 @@ public class Gamemap {
 				e.printStackTrace();
 			}
 		});
+	}
+	
+	private static void loadConfig() {
+		boolean read = false;
+		if(Files.isReadable(CONFIG_FILE)) {
+			try {
+				byte[] bytes = Files.readAllBytes(CONFIG_FILE);
+				String json = new String(bytes, StandardCharsets.UTF_8);
+				Gson gson = new Gson();
+				config = gson.fromJson(json, Config.class);
+				read = true;
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(read) {
+			File dir = new File(config.last_directory);
+			if(dir.exists()) fileChooser.setCurrentDirectory(dir);
+		} else {
+			config.last_directory = fileChooser.getCurrentDirectory().getAbsolutePath();
+		}
+	}
+	
+	private static Dimension getViewportSize() {
+		// TODO determine size based on what size works on the current display
+		int width = config.viewport_width;
+		if(width < 1) width = Config.DEFAULT_WIDTH;
+		int height = config.viewport_height;
+		if(height < 1) height = Config.DEFAULT_HEIGHT;
+		return new Dimension(width, height);
 	}
 	
 	private static void loadPlugins() {
@@ -96,7 +136,7 @@ public class Gamemap {
 
 		canvas = new GMCanvas();
 		canvas.setBackground(Color.DARK_GRAY);
-		canvas.setPreferredSize(getDefaultCanvasSize());
+		canvas.setPreferredSize(getViewportSize());
 		canvas.addMouseWheelListener(e -> {
 			int change = e.getWheelRotation();
 			if(change > 0) {
@@ -151,12 +191,6 @@ public class Gamemap {
 	 */
 	public static boolean isPrivelegedCode() {
 		return privelegedCode;
-	}
-
-	private static Dimension getDefaultCanvasSize() {
-		// TODO determine size based on last window size or check what size works on the current display
-		//return new Dimension(1600, 900);
-		return new Dimension(1280, 720);
 	}
 
 	private static MenuItem createMenuItem(String text, Menu parent) {
@@ -226,7 +260,6 @@ public class Gamemap {
 			if(result == JFileChooser.APPROVE_OPTION) {
 				// TODO disable loading buttons
 				final File file = fileChooser.getSelectedFile();
-				// TODO save directory to a config file; alternatively do all config stuff at exit
 				CompletableFuture.supplyAsync(() -> getPluginForFile(file)).thenApplyAsync(worlds -> {
 					if(worlds == null) {
 						JOptionPane.showMessageDialog(frame, "No plugins found that support this file",
@@ -270,8 +303,26 @@ public class Gamemap {
 			}
 		}
 	}
+	
+	private static void saveConfig() {
+		config.last_directory = fileChooser.getCurrentDirectory().getAbsolutePath();
+		if(frame.getExtendedState() == Frame.NORMAL) {
+			config.viewport_width = canvas.getWidth();
+			config.viewport_height = canvas.getHeight();
+		}
+		
+		try {
+			Gson gson = new Gson();
+			String json = gson.toJson(config);
+			byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+			Files.write(CONFIG_FILE, bytes);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	private static void attemptToExit() {
+		saveConfig();
 		frame.setVisible(false);
 		frame.dispose();
 	}

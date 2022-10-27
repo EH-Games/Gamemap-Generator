@@ -59,6 +59,7 @@ public final class WorldGroup extends WorldItem {
 		}
 	}
 
+	@Override
 	public void render(Camera camera, boolean transparent) {
 		if((visibilityFlags & camera.cameraFlag) == 0) return;
 		if((layerFlags & camera.layerFlag) == 0) return;
