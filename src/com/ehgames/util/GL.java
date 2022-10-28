@@ -3,14 +3,47 @@ package com.ehgames.util;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-//import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL15;
 
 public interface GL {
-	public static final int	TRIANGLES		= 4;	// GL11.GL_TRIANGLES;
-	public static final int	TRIANGLE_STRIP	= 5;	// GL11.GL_TRIANGLE_STRIP;
+	public static final int	POINTS						= 0;		// GL11.GL_POINTS;
+	public static final int	LINES						= 1;		// GL11.GL_LINES;
+	public static final int LINE_LOOP					= 2;		// GL11.GL_LINE_LOOP;
+	public static final int	LINE_STRIP					= 3;		// GL11.GL_LINE_STRIP;
+	public static final int	TRIANGLES					= 4;		// GL11.GL_TRIANGLES;
+	public static final int	TRIANGLE_STRIP				= 5;		// GL11.GL_TRIANGLE_STRIP;
+
+	public static final int	TEXTURE_MAG_FILTER			= 0x2800;	// GL11.GL_TEXTURE_MAG_FILTER;
+	public static final int	TEXTURE_MIN_FILTER			= 0x2801;	// GL11.GL_TEXTURE_MIN_FILTER;
+	
+	public static final int	NEAREST						= 0x2600;	// GL11.GL_NEAREST;
+	public static final int	LINEAR						= 0x2601;	// GL11.GL_LINEAR;
+
+	public static final int	TEXTURE_2D					= 0xDE1;	// GL11.GL_TEXTURE_2D;
+
+	public static final int	RGB							= 0x1907;	// GL11.GL_RGB;
+	public static final int	RGBA						= 0x1908;	// GL11.GL_RGBA;
+	public static final int	RGBA8						= 0x8058;	// GL11.GL_RGBA8;
+	public static final int	BGR							= 0x80E0;	// GL12.GL_BGR;
+	public static final int	BGRA						= 0x80E1;	// GL12.GL_BGRA;
+
+	public static final int	ARRAY_BUFFER				= 0x8892;	// GL15.GL_ARRAY_BUFFER;
+	public static final int	ELEMENT_ARRAY_BUFFER		= 0x8893;	// GL15.GL_ELEMENT_ARRAY_BUFFER;
+	
+	public static final int VERTEX_ARRAY				= 0x8074;	// GL11.GL_VERTEX_ARRAY;
+	public static final int TEXTURE_COORD_ARRAY			= 0x8078;	// GL11.GL_TEXTURE_COORD_ARRAY;
+
+	public static final int	FLOAT						= 0x1406;	// GL11.GL_FLOAT;
+	public static final int UNSIGNED_INT				= 0x1405;	// GL11.GL_UNSIGNED_INT;
+	public static final int	UNSIGNED_BYTE				= 0x1401;	// GL11.GL_UNSIGNED_BYTE;
+	public static final int	UNSIGNED_INT_8_8_8_8_REV	= 0x8367;
+
+	//static int a = GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
 
 	public boolean isCoreProfile();
-	
+
 	public void begin(int mode);
 	
 	public void end();
@@ -81,7 +114,7 @@ public interface GL {
 	
 	/**
 	 * 
-	 * @param mode Specifies what kind of primitives to render. Symbolic constants POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, TRIANGLES, QUAD_STRIP, QUADS, and POLYGON are accepted. 
+	 * @param mode Specifies what kind of primitives to render. Symbolic constants POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, and TRIANGLES are accepted. 
 	 * @param first Specifies the starting index in the enabled arrays.
 	 * @param count Specifies the number of indices to be rendered.
 	 */
@@ -90,6 +123,14 @@ public interface GL {
 	public void drawElements(int mode, int count, int type, ByteBuffer indices);
 	
 	public void drawElements(int mode, int count, int type, int offset);
+	
+	public void enable(int cap);
+	
+	public void disable(int cap);
+	
+	public void enableClientState(int cap);
+	
+	public void disableClientState(int cap);
 	
 	/**
 	 * 
@@ -112,9 +153,15 @@ public interface GL {
 	
 	public int genBuffer();
 	
+	public int createBuffer();
+	
 	public void deleteBuffer(int buffer);
 	
 	public void bindBuffer(int target, int buffer);
+	
+	public void bufferStorage(int target, ByteBuffer data, int flags);
+	
+	public void namedBufferStorage(int buffer, ByteBuffer data, int flags);
 	
 	public void bufferData(int target, ByteBuffer data, int usage);
 	

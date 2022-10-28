@@ -60,20 +60,20 @@ public final class WorldGroup extends WorldItem {
 	}
 
 	@Override
-	public void render(Camera camera, boolean transparent) {
-		if((visibilityFlags & camera.cameraFlag) == 0) return;
-		if((layerFlags & camera.layerFlag) == 0) return;
+	public void render(RenderState state) {
+		if((visibilityFlags & state.camera.cameraFlag) == 0) return;
+		if((layerFlags & state.camera.layerFlag) == 0) return;
 		
 		if(transparent) {
 			for(WorldItem obj : objects) {
 				if(obj.transparent) {
-					obj.render(camera, transparent);
+					obj.render(state);
 				}
 			}
 		} else {
 			for(WorldItem obj : objects) {
 				if(obj.transparent) {
-					obj.render(camera, transparent);
+					obj.render(state);
 				}
 			}
 		}

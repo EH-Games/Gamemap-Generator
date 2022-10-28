@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL44;
+import org.lwjgl.opengl.GL45;
 
 public final class LWJGL implements GL {
 
@@ -163,6 +165,26 @@ public final class LWJGL implements GL {
 	public int getAttribLocation(int program, String name) {
 		return GL20.glGetAttribLocation(program, name);
 	}
+	
+	@Override
+	public void enable(int cap) {
+		GL11.glEnable(cap);
+	}
+
+	@Override
+	public void disable(int cap) {
+		GL11.glDisable(cap);
+	}
+
+	@Override
+	public void enableClientState(int cap) {
+		GL11.glEnableClientState(cap);
+	}
+
+	@Override
+	public void disableClientState(int cap) {
+		GL11.glDisableClientState(cap);
+	}
 
 	@Override
 	public void pushMatrix() {
@@ -243,6 +265,11 @@ public final class LWJGL implements GL {
 	public int genBuffer() {
 		return GL15.glGenBuffers();
 	}
+	
+	@Override
+	public int createBuffer() {
+		return GL45.glCreateBuffers();
+	}
 
 	@Override
 	public void deleteBuffer(int buffer) {
@@ -252,6 +279,16 @@ public final class LWJGL implements GL {
 	@Override
 	public void bindBuffer(int target, int buffer) {
 		GL15.glBindBuffer(target, buffer);
+	}
+	
+	@Override
+	public void bufferStorage(int target, ByteBuffer data, int flags) {
+		GL44.glBufferStorage(target, data, flags);
+	}
+	
+	@Override
+	public void namedBufferStorage(int buffer, ByteBuffer data, int flags) {
+		GL45.glNamedBufferStorage(buffer, data, flags);
 	}
 
 	@Override

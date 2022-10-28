@@ -30,10 +30,10 @@ public class Gamemap {
 
 	private static Frame					frame;
 	private static GMCanvas					canvas;
-	private static boolean					privelegedCode	= false;
 	private static Config					config			= new Config();
 
 	public static Viewer					viewer			= new Viewer();
+	static int								zoomLevel		= 0;
 	static Camera							camera			= new Camera();
 	static World							activeWorld		= null;
 
@@ -139,10 +139,12 @@ public class Gamemap {
 		canvas.setPreferredSize(getViewportSize());
 		canvas.addMouseWheelListener(e -> {
 			int change = e.getWheelRotation();
-			if(change > 0) {
-				viewer.incrementZoom();
-			} else {
-				viewer.decrementZoom();
+			if(activeWorld != null && !camera.isPerspective()) {
+				if(change > 0) {
+					camera.setZoomLevel(++zoomLevel);
+				} else {
+					camera.setZoomLevel(--zoomLevel);
+				}
 			}
 			canvas.repaint();
 		});
@@ -170,8 +172,9 @@ public class Gamemap {
 					int dy = y - mouseY;
 					mouseX = x;
 					mouseY = y;
-					viewer.position.x += dx * 0.02;
-					viewer.position.y += dy * 0.02;
+					if(activeWorld != null && !camera.isPerspective()) {
+						camera.move((float) (dx), (float) (dy ), 0);
+					}
 					canvas.repaint();
 				}
 			}
@@ -182,15 +185,6 @@ public class Gamemap {
 		frame.setLocationRelativeTo(null);
 
 		return frame;
-	}
-	
-	/**
-	 * Flag to indicate between packages that code is allowed to run.<br>
-	 * This exists so that plugin's can't call internal code
-	 * without having everything in a single package.
-	 */
-	public static boolean isPrivelegedCode() {
-		return privelegedCode;
 	}
 
 	private static MenuItem createMenuItem(String text, Menu parent) {
@@ -285,9 +279,7 @@ public class Gamemap {
 										worlds.plugin.getName() + "\" did not return a gameworld",
 										"No Gameworld", JOptionPane.ERROR_MESSAGE);
 							} else {
-								privelegedCode = true;
 								camera.onWorldChange(world);
-								privelegedCode = false;
 								activeWorld = world;
 								if(!canvas.activeRendering) canvas.repaint();
 							}
@@ -296,6 +288,7 @@ public class Gamemap {
 									worlds.plugin.getName() +
 									"\" threw an exception creating a gameworld:\n" + e.toString(),
 									"Import Exception", JOptionPane.ERROR_MESSAGE);
+							e.printStackTrace();
 						}
 					}
 					// TODO reenable loading buttons 

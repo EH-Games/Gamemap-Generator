@@ -3,6 +3,11 @@ package gamemap;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.AWTGLCanvas;
 
+import com.ehgames.util.GL;
+import com.ehgames.util.LWJGL;
+
+import gamemap.world.World;
+
 import static org.lwjgl.opengl.GL11.*;
 
 import java.nio.FloatBuffer;
@@ -14,6 +19,7 @@ class GMCanvas extends AWTGLCanvas {
 	private int height;
 	private FloatBuffer projection = BufferUtils.createFloatBuffer(16);
 	public boolean activeRendering = true;
+	private GL gl;
 	
 	GMCanvas() throws LWJGLException {
 		
@@ -22,6 +28,8 @@ class GMCanvas extends AWTGLCanvas {
 	
 	@Override
 	protected void initGL() {
+		gl = new LWJGL();
+		
 		glClearColor(0, 0, 0, 0);
 		glClearDepth(1);
 		
@@ -39,6 +47,8 @@ class GMCanvas extends AWTGLCanvas {
 			glViewport(0, 0, width, height);
 			
 			rebuildPerspective();
+
+			Gamemap.camera.onViewportResize(width, height);
 		}
 	}
 	
@@ -67,34 +77,41 @@ class GMCanvas extends AWTGLCanvas {
 	protected void paintGL() {
 		handlePotentialResize();
 		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		Viewer viewer = Gamemap.viewer;
-		
-		// camera projection
-		glMatrixMode(GL_PROJECTION);
-		if(viewer.orthogonal) {
-			glLoadIdentity();
-			glOrtho(width / -100.0f, width / 100.0f, height / -100.0f, height / 100.0f, -500, 500);
+		World world = Gamemap.activeWorld;
+		if(world != null) {
+			glClearColor(world.backgroundColor.x, world.backgroundColor.y, world.backgroundColor.z, 1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			world.render(Gamemap.camera, gl);
 		} else {
-			glLoadMatrix(projection);
-		}
-		
-		// camera view
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		float z = -viewer.position.z;
-		if(!viewer.orthogonal) z -= 10; // temporary until I have a better default position and elevation control
-		glTranslatef(-viewer.position.x, -viewer.position.y, z);
-		float scale = viewer.getScale();
-		glScalef(scale, scale, scale);
-		
-		glDisable(GL_DEPTH_TEST);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			Viewer viewer = Gamemap.viewer;
+			
+			// camera projection
+			glMatrixMode(GL_PROJECTION);
+			if(viewer.orthogonal) {
+				glLoadIdentity();
+				glOrtho(width / -100.0f, width / 100.0f, height / -100.0f, height / 100.0f, -500, 500);
+			} else {
+				glLoadMatrix(projection);
+			}
+			
+			// camera view
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			float z = -viewer.position.z;
+			if(!viewer.orthogonal) z -= 10; // temporary until I have a better default position and elevation control
+			glTranslatef(-viewer.position.x, -viewer.position.y, z);
+			float scale = viewer.getScale();
+			glScalef(scale, scale, scale);
+			
+			glDisable(GL_DEPTH_TEST);
 
-		drawTestObjectAt(0, 0, 0);
-		drawTestObjectAt(4, 0, 0);
-		drawTestObjectAt(0, 4, 0);
-		drawTestObjectAt(-4, -4, 0);
+			drawTestObjectAt(0, 0, 0);
+			drawTestObjectAt(4, 0, 0);
+			drawTestObjectAt(0, 4, 0);
+			drawTestObjectAt(-4, -4, 0);
+		}
 		
 		try {
 			swapBuffers();

@@ -1,11 +1,21 @@
 package gamemap.world;
 
+import java.util.LinkedList;
+
 import com.ehgames.util.AABB;
+import com.ehgames.util.Mat4;
 import com.ehgames.util.Vec3;
 
-import gamemap.Gamemap;
-
 public class Camera {
+	private static final float					ORTHO_Z_VAL		= 2000;
+	private static final LinkedList<Integer>	FREE_CAMERAS	= new LinkedList<>();
+
+	static {
+		for(int i = 0; i < 28; i++) {
+			FREE_CAMERAS.add(1 << i);
+		}
+	}
+
 	final Vec3		position			= new Vec3();
 	final AABB		bounds				= new AABB();
 
@@ -17,7 +27,10 @@ public class Camera {
 	float			fovY;
 
 	private Vec3[]	frustumPoints		= new Vec3[8];
+	Mat4			projection			= new Mat4();
+	Mat4			view				= new Mat4();
 
+	double			scale				= 1;
 	float			halfWidth;
 	float			halfHeight;
 
@@ -33,16 +46,66 @@ public class Camera {
 	int				time;
 
 	boolean			blockUntilLoaded	= false;
+	
+	public Camera() {
+		Integer flag = FREE_CAMERAS.poll();
+		if(flag != null) cameraFlag = flag;
+	}
 
-	/** Internal method. do not call */
 	public void onWorldChange(World world) {
-		if(!Gamemap.isPrivelegedCode()) return;
-		
 		position.set(world.initialPos);
 		int area = world.defaultArea;
 		if(area >= world.areaCount) area = 0;
 		areaFlag = 1 << world.defaultArea;
+		calculateBounds();
+	}
 
+	public void onViewportResize(int width, int height) {
+		halfWidth = width * 0.5f;
+		halfHeight = height * 0.5f;
+		// TODO implement
+		if(perspective) {
+			
+		} else {
+			bounds.minZ = -ORTHO_Z_VAL;
+			bounds.maxZ = ORTHO_Z_VAL;
+		}
+		calculateBounds();
+	}
+	
+	public boolean isPerspective() {
+		return perspective;
+	}
+	
+	public void move(float x, float y, float z) {
+		position.x += x;
+		position.y += y;
+		position.z += z;
+		calculateBounds();
+	}
+	
+	public void setZoomLevel(int level) {
+		double tmp = 1;
+		
+		// can't calculate as a fraction using integers because we easily overflow data types
+		if(level > 0) {
+			for(int i = 0; i < level; i++) {
+				tmp *= 1.1;
+			}
+		} else if(level < 0) {
+			for(int i = 0; i > level; i--) {
+				tmp *= 0.9;
+			}
+		}
+
+		// causes zoom to remain centered on window center
+		// we could possibly factor in mouse coordinates as well to make it centered on the mouse
+		position.x = (float) (position.x / scale * tmp);
+		position.y = (float) (position.y / scale * tmp);
+		
+		//System.out.println("s = " + tmp);
+		scale = tmp;
+		calculateBounds();
 	}
 
 	void copyWorldProperties(Camera camera) {
@@ -75,10 +138,24 @@ public class Camera {
 		} else {
 			// min and max z assumed to already be set to
 			// user-defined minimum and maximum values
-			bounds.minX = position.x - halfWidth;
-			bounds.maxX = position.x + halfWidth;
-			bounds.maxY = position.y + halfHeight;
-			bounds.minY = position.y - halfHeight;
+			bounds.minX = (float) (position.x - halfWidth * scale);
+			bounds.maxX = (float) (position.x + halfWidth * scale);
+			bounds.maxY = (float) (position.y + halfHeight * scale);
+			bounds.minY = (float) (position.y - halfHeight * scale);
+			
+			projection.setOrtho(-halfWidth, halfWidth, -halfHeight, halfHeight, -ORTHO_Z_VAL, ORTHO_Z_VAL);
+			view.setIdentity();
+			view.m.put(0, (float) scale);
+			view.m.put(5, (float) scale);
+			view.m.put(10, (float) scale);
+			view.m.put(12, -position.x);
+			view.m.put(13, -position.y);
+		}
+	}
+	
+	public void finalize() {
+		if(cameraFlag != 0) {
+			FREE_CAMERAS.add(cameraFlag);
 		}
 	}
 }

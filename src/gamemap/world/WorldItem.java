@@ -37,5 +37,5 @@ public abstract class WorldItem {
 	public abstract void recalculateBounds();
 	public abstract void testVisibility(Camera camera);
 	public abstract void testVisibility2d(Camera camera);
-	public abstract void render(Camera camera, boolean transparent);
+	public abstract void render(RenderState state);
 }

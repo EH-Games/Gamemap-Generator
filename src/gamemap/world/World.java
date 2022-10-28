@@ -1,5 +1,6 @@
 package gamemap.world;
 
+import com.ehgames.util.GL;
 import com.ehgames.util.Vec3;
 
 public abstract class World {
@@ -15,5 +16,5 @@ public abstract class World {
 	// package protected so theres no funny subclasses
 	World() {}
 
-	public abstract void render(Camera camera);
+	public abstract void render(Camera camera, GL gl);
 }

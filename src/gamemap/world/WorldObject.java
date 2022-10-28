@@ -3,15 +3,19 @@ package gamemap.world;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ehgames.util.AABB;
+import com.ehgames.util.GL;
 import com.ehgames.util.Vec3;
 
-import gamemap.Model;
+import gamemap.ObjectRenderer;
 import gamemap.Texture;
 
 /** A renderable item within the world. */
 public class WorldObject extends WorldItem {
+	public static boolean		drawBounds	= true;
+	
 	public final Vec3			position	= new Vec3();
-	public Model				model;
+	public ObjectRenderer		renderer;
 	public Map<String, Texture>	textures	= new HashMap<>();
 	/** Earliest time this object is visible (inclusive) */
 	public int					minTime		= Integer.MIN_VALUE;
@@ -83,12 +87,34 @@ public class WorldObject extends WorldItem {
 	}
 	
 	@Override
-	public void render(Camera camera, boolean transparent) {
-		if((visibilityFlags & camera.cameraFlag) == 0) return;
-		if(layerFlags != camera.layerFlag) return;
+	public void render(RenderState state) {
+		if((visibilityFlags & state.camera.cameraFlag) == 0) return;
+		if(layerFlags != state.camera.layerFlag) return;
 		
-		if(model != null) {
-			model.render(transparent, textures);
+		if(renderer != null) {
+			state.object = this;
+			renderer.render(state);
+		}
+		
+		//drawBounds = false;
+		if(drawBounds) {
+			GL gl = state.gl;
+			gl.disable(GL.TEXTURE_2D);
+			gl.begin(GL.LINE_LOOP);
+			gl.color3f(1, 0, 0);
+			AABB box = state.object.bounds;
+			gl.vertex3f(box.minX, box.minY, 50);
+			gl.vertex3f(box.maxX, box.minY, 50);
+			gl.vertex3f(box.maxX, box.maxY, 50);
+			gl.vertex3f(box.minX, box.maxY, 50);
+			gl.end();
+			gl.begin(GL.POINTS);
+			Vec3 pos = state.object.position;
+			gl.color3f(0, 1, 0);
+			gl.vertex3f(pos.x, pos.y, 55);
+			gl.color3f(1, 1, 1);
+			gl.end();
+			gl.enable(GL.TEXTURE_2D);
 		}
 	}
 }
