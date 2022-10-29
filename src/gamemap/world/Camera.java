@@ -91,12 +91,17 @@ public class Camera {
 
 		// causes zoom to remain centered on window center
 		// we could possibly factor in mouse coordinates as well to make it centered on the mouse
-		position.x = (float) (position.x / pixelsPerUnit * ppuNew);
-		position.y = (float) (position.y / pixelsPerUnit * ppuNew);
+		//position.x = (float) (position.x / pixelsPerUnit * ppuNew);
+		//position.y = (float) (position.y / pixelsPerUnit * ppuNew);
 		
 		//System.out.println("s = " + ppuNew);
 		pixelsPerUnit = ppuNew;
 		calculateBounds();
+	}
+
+	/** gets the scale in pixels per unit for when this camera uses an orthographic projection */
+	public double getScale() {
+		return pixelsPerUnit;
 	}
 
 	void copyWorldProperties(Camera camera) {
@@ -131,14 +136,14 @@ public class Camera {
 			// user-defined minimum and maximum values
 			// if width is 640 and the scale is 2 pixels per unit,
 			// then the bounds should be 360 units wide, hence division
-			final double xHalf = halfWidth / pixelsPerUnit;
-			final double yHalf = halfHeight / pixelsPerUnit;
-			bounds.minX = (float) (position.x - xHalf);
-			bounds.maxX = (float) (position.x + xHalf);
-			bounds.maxY = (float) (position.y + yHalf);
-			bounds.minY = (float) (position.y - yHalf);
+			final float xHalf = (float) (halfWidth / pixelsPerUnit);
+			final float yHalf = (float) (halfHeight / pixelsPerUnit);
+			bounds.minX = position.x - xHalf;
+			bounds.maxX = position.x + xHalf;
+			bounds.maxY = position.y + yHalf;
+			bounds.minY = position.y - yHalf;
 			
-			projection.setOrtho(bounds.minX, halfWidth, -halfHeight, halfHeight, -ORTHO_Z_VAL, ORTHO_Z_VAL);
+			projection.setOrtho(-xHalf, xHalf, -yHalf, yHalf, -ORTHO_Z_VAL, ORTHO_Z_VAL);
 			view.setIdentity();
 			view.m.put(12, -position.x);
 			view.m.put(13, -position.y);

@@ -173,7 +173,8 @@ public class Gamemap {
 					mouseX = x;
 					mouseY = y;
 					if(activeWorld != null && !camera.isPerspective()) {
-						camera.move((float) (dx), (float) (dy ), 0);
+						double scale = camera.getScale();
+						camera.move((float) (dx / scale), (float) (dy / scale), 0);
 					}
 					canvas.repaint();
 				}
