@@ -30,7 +30,7 @@ public class Camera {
 	Mat4			projection			= new Mat4();
 	Mat4			view				= new Mat4();
 
-	double			scale				= 1;
+	double			pixelsPerUnit		= 1;
 	float			halfWidth;
 	float			halfHeight;
 
@@ -63,9 +63,9 @@ public class Camera {
 	public void onViewportResize(int width, int height) {
 		halfWidth = width * 0.5f;
 		halfHeight = height * 0.5f;
-		// TODO implement
+		
 		if(perspective) {
-			
+			// TODO implement	
 		} else {
 			bounds.minZ = -ORTHO_Z_VAL;
 			bounds.maxZ = ORTHO_Z_VAL;
@@ -85,26 +85,17 @@ public class Camera {
 	}
 	
 	public void setZoomLevel(int level) {
-		double tmp = 1;
-		
-		// can't calculate as a fraction using integers because we easily overflow data types
-		if(level > 0) {
-			for(int i = 0; i < level; i++) {
-				tmp *= 1.1;
-			}
-		} else if(level < 0) {
-			for(int i = 0; i > level; i--) {
-				tmp *= 0.9;
-			}
-		}
+		// much cleaner code when you use the standard library method that does
+		// the same exact thing as the 20 lines of code you wrote -EH (10/28/22)
+		double ppuNew = Math.pow(1.1, level);
 
 		// causes zoom to remain centered on window center
 		// we could possibly factor in mouse coordinates as well to make it centered on the mouse
-		position.x = (float) (position.x / scale * tmp);
-		position.y = (float) (position.y / scale * tmp);
+		position.x = (float) (position.x / pixelsPerUnit * ppuNew);
+		position.y = (float) (position.y / pixelsPerUnit * ppuNew);
 		
-		//System.out.println("s = " + tmp);
-		scale = tmp;
+		//System.out.println("s = " + ppuNew);
+		pixelsPerUnit = ppuNew;
 		calculateBounds();
 	}
 
@@ -138,16 +129,17 @@ public class Camera {
 		} else {
 			// min and max z assumed to already be set to
 			// user-defined minimum and maximum values
-			bounds.minX = (float) (position.x - halfWidth * scale);
-			bounds.maxX = (float) (position.x + halfWidth * scale);
-			bounds.maxY = (float) (position.y + halfHeight * scale);
-			bounds.minY = (float) (position.y - halfHeight * scale);
+			// if width is 640 and the scale is 2 pixels per unit,
+			// then the bounds should be 360 units wide, hence division
+			final double xHalf = halfWidth / pixelsPerUnit;
+			final double yHalf = halfHeight / pixelsPerUnit;
+			bounds.minX = (float) (position.x - xHalf);
+			bounds.maxX = (float) (position.x + xHalf);
+			bounds.maxY = (float) (position.y + yHalf);
+			bounds.minY = (float) (position.y - yHalf);
 			
-			projection.setOrtho(-halfWidth, halfWidth, -halfHeight, halfHeight, -ORTHO_Z_VAL, ORTHO_Z_VAL);
+			projection.setOrtho(bounds.minX, halfWidth, -halfHeight, halfHeight, -ORTHO_Z_VAL, ORTHO_Z_VAL);
 			view.setIdentity();
-			view.m.put(0, (float) scale);
-			view.m.put(5, (float) scale);
-			view.m.put(10, (float) scale);
 			view.m.put(12, -position.x);
 			view.m.put(13, -position.y);
 		}

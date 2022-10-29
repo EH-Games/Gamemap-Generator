@@ -2,13 +2,6 @@ package gamemap.world;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL45;
-
 import com.ehgames.util.GL;
 import com.ehgames.util.Mat4;
 
@@ -41,5 +34,18 @@ public class RenderState {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_ALPHA_TEST);
 		glAlphaFunc(GL_GREATER, 0);
+		
+		if(!camera.perspective) {
+			glDisable(GL_TEXTURE_2D);
+			glBegin(GL_LINE_LOOP);
+			glColor3f(0, 1, 1);
+			com.ehgames.util.AABB box = camera.bounds;
+			glVertex3f(box.minX + 0.5f, box.maxY - 0.5f, 100);
+			glVertex3f(box.minX + 0.5f, box.minY + 0.5f, 100);
+			glVertex3f(box.maxX - 0.5f, box.minY + 0.5f, 100);
+			glVertex3f(box.maxX - 0.5f, box.maxY - 0.5f, 100);
+			glEnd();
+			glEnable(GL_TEXTURE_2D);
+		}
 	}
 }

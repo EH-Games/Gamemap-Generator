@@ -75,4 +75,9 @@ public class Vec3 {
 		out.y = y + in.y;
 		out.z = z + in.z;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("(%.2f, %.2f, %.2f)", x, y, z);
+	}
 }
