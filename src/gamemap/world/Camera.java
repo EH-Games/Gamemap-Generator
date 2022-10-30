@@ -24,15 +24,20 @@ public class Camera {
 	float			nearClipSq			= 0.01f;
 	float			farClipSq			= 1000_000;
 	boolean			perspective			= false;
-	float			fovY;
+	float			fovY				= (float) Math.toRadians(80);
 
 	private Vec3[]	frustumPoints		= new Vec3[8];
 	Mat4			projection			= new Mat4();
 	Mat4			view				= new Mat4();
+	Mat4			rotation			= new Mat4();
+	Mat4			invRotation			= new Mat4();
 
 	double			pixelsPerUnit		= 1;
 	float			halfWidth;
 	float			halfHeight;
+	int				width;
+	int				height;
+	private boolean	rebuildBounds		= true;
 
 	/** internal flag used for marking objects as visible */
 	int				cameraFlag;
@@ -50,6 +55,9 @@ public class Camera {
 	public Camera() {
 		Integer flag = FREE_CAMERAS.poll();
 		if(flag != null) cameraFlag = flag;
+		for(int i = 0; i < frustumPoints.length; i++) {
+			frustumPoints[i] = new Vec3();
+		}
 	}
 
 	public void onWorldChange(World world) {
@@ -57,19 +65,74 @@ public class Camera {
 		int area = world.defaultArea;
 		if(area >= world.areaCount) area = 0;
 		areaFlag = 1 << world.defaultArea;
-		calculateBounds();
+		resetRotation();
 	}
-
-	public void onViewportResize(int width, int height) {
-		halfWidth = width * 0.5f;
-		halfHeight = height * 0.5f;
-		
+	
+	private void updateProjection() {
 		if(perspective) {
-			// TODO implement	
+			float aspect = width / (float) height;
+			projection.setPerspective(fovY, aspect, nearClip, farClip);
+			
+			buildFrustum(aspect);
 		} else {
 			bounds.minZ = -ORTHO_Z_VAL;
 			bounds.maxZ = ORTHO_Z_VAL;
 		}
+		rebuildBounds = true;
+		calculateBounds();
+	}
+
+	public void onViewportResize(int width, int height) {
+		if(height == 0) height = 1;
+		this.width = width;
+		this.height = height;
+		halfWidth = width * 0.5f;
+		halfHeight = height * 0.5f;
+		updateProjection();
+	}
+	
+	private void buildFrustum(float aspect) {
+		float f = (float) Math.tan(fovY / 2); 
+		float yNear = f * nearClip;
+		float yFar = f * farClip;
+		float xNear = yNear * aspect;
+		float xFar = yFar * aspect;
+		frustumPoints[0].set(-xNear, yNear, -nearClip);
+		frustumPoints[1].set(-xNear, -yNear, -nearClip);
+		frustumPoints[2].set(xNear, -yNear, -nearClip);
+		frustumPoints[3].set(xNear, yNear, -nearClip);
+		frustumPoints[4].set(-xFar, yFar, -farClip);
+		frustumPoints[5].set(-xFar, -yFar, -farClip);
+		frustumPoints[6].set(xFar, -yFar, -farClip);
+		frustumPoints[7].set(xFar, yFar, -farClip);
+	}
+	
+	public void resetRotation() {
+		rotation.setIdentity();
+		invRotation.setIdentity();
+		
+		rotateX(Math.toRadians(80));
+	}
+	
+	public void rotateX(double rot) {
+		Mat4 tmp = new Mat4();
+		tmp.rotateX(rot);
+		rotation.mult(tmp, rotation);
+		tmp.rotateX(-rot);
+		invRotation.mult(tmp, invRotation);
+
+		rebuildBounds = true;
+		calculateBounds();
+	}
+	
+	public void rotateY(double rot) {
+		Mat4 tmp = new Mat4();
+		tmp.rotateY(rot);
+		rotation.mult(tmp, rotation);
+		tmp.rotateY(-rot);
+		invRotation.mult(tmp, invRotation);
+
+		rebuildBounds = true;
 		calculateBounds();
 	}
 	
@@ -77,10 +140,16 @@ public class Camera {
 		return perspective;
 	}
 	
+	public void setPerspective(boolean perspective) {
+		this.perspective = perspective;
+		updateProjection();
+	}
+	
 	public void move(float x, float y, float z) {
 		position.x += x;
 		position.y += y;
 		position.z += z;
+		rebuildBounds = true;
 		calculateBounds();
 	}
 	
@@ -96,6 +165,7 @@ public class Camera {
 		
 		//System.out.println("s = " + ppuNew);
 		pixelsPerUnit = ppuNew;
+		rebuildBounds = true;
 		calculateBounds();
 	}
 
@@ -121,16 +191,18 @@ public class Camera {
 	
 	void calculateBounds() {
 		if(perspective) {
-			// TODO implement
-			// build frustum from near clip, far clip & fov(along with matrix)
-			// above can be cached and only updaed when needed
 			bounds.prepForBuild();
 			Vec3 transformed = new Vec3();
 			for(Vec3 fp : frustumPoints) {
-				// rotate point using pitch and yaw
+				rotation.transform(fp, transformed);
 				transformed.addInPlace(position);
 				bounds.add(transformed);
 			}
+			view.setIdentity();
+			view.m.put(12, -position.x);
+			view.m.put(13, -position.y);
+			view.m.put(14, -position.z);
+			invRotation.mult(view, view);
 		} else {
 			// min and max z assumed to already be set to
 			// user-defined minimum and maximum values
@@ -150,6 +222,7 @@ public class Camera {
 		}
 	}
 	
+	@Override
 	public void finalize() {
 		if(cameraFlag != 0) {
 			FREE_CAMERAS.add(cameraFlag);

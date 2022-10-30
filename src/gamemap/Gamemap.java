@@ -32,7 +32,6 @@ public class Gamemap {
 	private static GMCanvas					canvas;
 	private static Config					config			= new Config();
 
-	public static Viewer					viewer			= new Viewer();
 	static int								zoomLevel		= 0;
 	static Camera							camera			= new Camera();
 	static World							activeWorld		= null;
@@ -156,9 +155,10 @@ public class Gamemap {
 					mouseX = e.getX();
 					mouseY = e.getY();
 				} else if(btn == MouseEvent.BUTTON3) {
-					viewer.position.x = 0;
-					viewer.position.y = 0;
-					canvas.repaint();
+					if(activeWorld != null) {
+						camera.onWorldChange(activeWorld);
+						canvas.repaint();
+					}
 				}
 			}
 		});
@@ -205,9 +205,9 @@ public class Gamemap {
 		menus.add(file);
 
 		Menu view = new Menu("View");
-		CheckboxMenuItem ortho = new CheckboxMenuItem("Topdown View", viewer.orthogonal);
+		CheckboxMenuItem ortho = new CheckboxMenuItem("Topdown View", !camera.isPerspective());
 		ortho.addItemListener(e -> {
-			viewer.orthogonal = ortho.getState();
+			camera.setPerspective(!ortho.getState());
 			canvas.repaint();
 		});
 		view.add(ortho);

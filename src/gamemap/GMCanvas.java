@@ -42,7 +42,7 @@ class GMCanvas extends AWTGLCanvas {
 		if(width != newWidth || height != newHeight) {
 			width = newWidth;
 			height = newHeight;
-			System.out.println("Window resized to " + width + " x " + height);
+			//System.out.println("Window resized to " + width + " x " + height);
 			
 			glViewport(0, 0, width, height);
 			
@@ -84,33 +84,6 @@ class GMCanvas extends AWTGLCanvas {
 			world.render(Gamemap.camera, gl);
 		} else {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-			Viewer viewer = Gamemap.viewer;
-			
-			// camera projection
-			glMatrixMode(GL_PROJECTION);
-			if(viewer.orthogonal) {
-				glLoadIdentity();
-				glOrtho(width / -100.0f, width / 100.0f, height / -100.0f, height / 100.0f, -500, 500);
-			} else {
-				glLoadMatrix(projection);
-			}
-			
-			// camera view
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			float z = -viewer.position.z;
-			if(!viewer.orthogonal) z -= 10; // temporary until I have a better default position and elevation control
-			glTranslatef(-viewer.position.x, -viewer.position.y, z);
-			float scale = viewer.getScale();
-			glScalef(scale, scale, scale);
-			
-			glDisable(GL_DEPTH_TEST);
-
-			drawTestObjectAt(0, 0, 0);
-			drawTestObjectAt(4, 0, 0);
-			drawTestObjectAt(0, 4, 0);
-			drawTestObjectAt(-4, -4, 0);
 		}
 		
 		try {

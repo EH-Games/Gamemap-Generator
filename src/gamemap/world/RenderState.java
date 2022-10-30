@@ -2,6 +2,10 @@ package gamemap.world;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
 import com.ehgames.util.GL;
 import com.ehgames.util.Mat4;
 
@@ -25,14 +29,27 @@ public class RenderState {
 		out.set(camera.view);
 	}
 	
+	private static boolean test = true;
+	
 	public void applyCameraFixedFunc() {
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrix(camera.projection.m);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrix(camera.view.m);
+
+		// makes isometric
+//		glRotatef(-45, 1, 0, 0);
+//		glRotatef(45, 0, 0, 1);
 		
+		glEnable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glClearDepth(1);
 		glEnable(GL_ALPHA_TEST);
 		glAlphaFunc(GL_GREATER, 0);
+		//glPolygonMode(GL_FRONT, GL_FILL);
+		//glPolygonMode(GL_BACK, GL_LINE);
 	}
 }
