@@ -2,10 +2,12 @@ package gamemap;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -19,6 +21,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.lwjgl.LWJGLException;
 
+import com.ehgames.util.Vec3;
 import com.google.gson.Gson;
 
 import gamemap.world.Camera;
@@ -27,6 +30,10 @@ import gamemap.world.World;
 public class Gamemap {
 	public static final String				APP_NAME		= "Gamemap Generator 1.0.0";
 	private static final Path				CONFIG_FILE		= new File("config.json").toPath();
+	private static final int				INVALID_AXIS	= -5;
+	// map of key press states to allow smooth motion with active rendering
+	// since we can't use LWJGL's Keyboard class with an AWTGLCanvas
+	private static final boolean[]			KEY_STATES		= new boolean[1024];
 
 	private static Frame					frame;
 	private static GMCanvas					canvas;
@@ -94,6 +101,62 @@ public class Gamemap {
 		return new Dimension(width, height);
 	}
 	
+	static void handleKeysActive() {
+		// canvas.hasFocus() seems to work fine
+		if(activeWorld == null || !camera.isPerspective() || !canvas.hasFocus()) return;
+		
+		Vec3 total = new Vec3();
+		Vec3 tmp = new Vec3();
+		
+		if(KEY_STATES[config.keys.forward] || KEY_STATES[config.keys.forward_alt]) {
+			camera.getViewAxis(2, tmp);
+			total.addInPlace(tmp.scaleInPlace(-1));
+		}
+		if(KEY_STATES[config.keys.backward] || KEY_STATES[config.keys.backward_alt]) {
+			camera.getViewAxis(2, tmp);
+			total.addInPlace(tmp);
+		}
+		if(KEY_STATES[config.keys.left] || KEY_STATES[config.keys.left_alt]) {
+			camera.getViewAxis(0, tmp);
+			total.addInPlace(tmp.scaleInPlace(-1));
+		}
+		if(KEY_STATES[config.keys.right] || KEY_STATES[config.keys.right_alt]) {
+			camera.getViewAxis(0, tmp);
+			total.addInPlace(tmp);
+		}
+		if(KEY_STATES[config.keys.up] || KEY_STATES[config.keys.up_alt]) {
+			if(config.global_z_movement) {
+				tmp.set(0, 0, 1);
+			} else {				
+				camera.getViewAxis(1, tmp);
+			}
+			total.addInPlace(tmp);
+		}
+		if(KEY_STATES[config.keys.down] || KEY_STATES[config.keys.down_alt]) {
+			if(config.global_z_movement) {
+				tmp.set(0, 0, -1);
+			} else {				
+				camera.getViewAxis(1, tmp).scaleInPlace(-1);
+			}
+			total.addInPlace(tmp);
+		}
+		
+		if(total.x != 0 || total.y != 0 || total.z != 0) {
+			boolean shift = KEY_STATES[KeyEvent.VK_SHIFT];
+			boolean ctrl = KEY_STATES[KeyEvent.VK_CONTROL];
+			
+			float speed = config.base_speed;
+			if(shift) {
+				speed = ctrl ? config.shift_ctrl_speed : config.shift_speed;
+			} else if(ctrl) {
+				speed = config.ctrl_speed;
+			}
+			
+			total.scaleInPlace(speed);
+			camera.move(total);
+		}
+	}
+	
 	private static void loadPlugins() {
 		ServiceLoader<Plugin> loader =  ServiceLoader.load(
 				Plugin.class, new PluginClassLoader());
@@ -119,6 +182,28 @@ public class Gamemap {
 		if(loadedCount != 1) str.append('s');
 		System.out.println(str);
 	}
+	
+	private static int axisFromKey(int key) {
+		if(key == config.keys.forward || key == config.keys.forward_alt) {
+			return -3;
+		}
+		if(key == config.keys.backward || key == config.keys.backward_alt) {
+			return 2;
+		}
+		if(key == config.keys.left || key == config.keys.left_alt) {
+			return -1;
+		}
+		if(key == config.keys.right || key == config.keys.right_alt) {
+			return 0;
+		}
+		if(key == config.keys.up || key == config.keys.up_alt) {
+			return 1;
+		}
+		if(key == config.keys.down || key == config.keys.down_alt) {
+			return -2;
+		}
+		return INVALID_AXIS;
+	}
 
 	private static Frame createFrame() throws LWJGLException {
 		Frame frame = new Frame();
@@ -128,6 +213,7 @@ public class Gamemap {
 		frame.setMenuBar(menus);
 
 		frame.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				attemptToExit();
 			}
@@ -172,14 +258,73 @@ public class Gamemap {
 					int dy = y - mouseY;
 					mouseX = x;
 					mouseY = y;
-					if(activeWorld != null && !camera.isPerspective()) {
-						double scale = camera.getScale();
-						camera.move((float) (dx / scale), (float) (dy / scale), 0);
+					if(activeWorld != null) {
+						if(camera.isPerspective()) {
+							if(dx != 0) {
+								camera.rotateY(dx * config.sensitivity_x);
+							}
+							if(dy != 0) {
+								camera.rotateX(-dy * config.sensitivity_y);
+							}
+						} else {
+							double scale = camera.getScale();
+							camera.move((float) (dx / scale), (float) (dy / scale), 0);
+						}
 					}
 					canvas.repaint();
 				}
 			}
 		});
+		//*
+		canvas.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(activeWorld == null || !camera.isPerspective()) return;
+				
+				int keyCode = e.getKeyCode();
+				if(keyCode >= 0 && keyCode < KEY_STATES.length) {
+					KEY_STATES[keyCode] = true;
+				}
+				// active rendering has its own movement code that should be much smoother
+				if(canvas.activeRendering) return;
+				
+				int axis = axisFromKey(e.getKeyCode());
+				if(axis == INVALID_AXIS) return;
+
+				float speed = config.base_speed;
+				boolean ctrl = e.isControlDown();
+				if(e.isShiftDown()) {
+					speed = ctrl ? config.shift_ctrl_speed : config.shift_speed;
+				} else if(ctrl) {
+					speed = config.ctrl_speed;
+				}
+
+				// negative axis
+				if(axis < 0) {
+					axis = ~axis;
+					speed = -speed;
+				}
+				
+				Vec3 val = new Vec3();
+				if(axis == 1 && config.global_z_movement) {
+					val.set(0, 0, speed);
+				} else {
+					camera.getViewAxis(axis, val);
+					val.scaleInPlace(speed);
+				}
+				camera.move(val);
+				canvas.repaint();
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				if(keyCode >= 0 && keyCode < KEY_STATES.length) {
+					KEY_STATES[keyCode] = false;
+				}
+			}
+		});
+		//*/
 		frame.add(canvas);
 
 		frame.pack();

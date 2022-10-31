@@ -50,9 +50,15 @@ public class Camera {
 
 	int				time;
 
-	boolean			blockUntilLoaded	= false;
+	/** background threads block until all relevant object renderers are loaded before rendering */
+	final boolean	background;
 	
 	public Camera() {
+		this(false);
+	}
+	
+	public Camera(boolean background) {
+		this.background = background;
 		Integer flag = FREE_CAMERAS.poll();
 		if(flag != null) cameraFlag = flag;
 		for(int i = 0; i < frustumPoints.length; i++) {
@@ -107,6 +113,10 @@ public class Camera {
 		frustumPoints[7].set(xFar, yFar, -farClip);
 	}
 	
+	public Vec3 getViewAxis(int axis, Vec3 out) {
+		return view.getAxis(axis, out);
+	}
+	
 	public void resetRotation() {
 		rotation.setIdentity();
 		invRotation.setIdentity();
@@ -117,19 +127,20 @@ public class Camera {
 	public void rotateX(double rot) {
 		Mat4 tmp = new Mat4();
 		tmp.rotateX(rot);
-		rotation.mult(tmp, rotation);
+		tmp.mult(rotation, rotation);
 		tmp.rotateX(-rot);
-		invRotation.mult(tmp, invRotation);
+		tmp.mult(invRotation, invRotation);
 
 		rebuildBounds = true;
 		calculateBounds();
 	}
 	
 	public void rotateY(double rot) {
+		// premultiplying with z gives a much nicer effect than postmultiplying with y
 		Mat4 tmp = new Mat4();
-		tmp.rotateY(rot);
+		tmp.rotateZ(rot);
 		rotation.mult(tmp, rotation);
-		tmp.rotateY(-rot);
+		tmp.rotateZ(-rot);
 		invRotation.mult(tmp, invRotation);
 
 		rebuildBounds = true;
@@ -143,6 +154,10 @@ public class Camera {
 	public void setPerspective(boolean perspective) {
 		this.perspective = perspective;
 		updateProjection();
+	}
+	
+	public void move(Vec3 v) {
+		move(v.x, v.y, v.z);
 	}
 	
 	public void move(float x, float y, float z) {

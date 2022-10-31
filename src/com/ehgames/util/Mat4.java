@@ -80,6 +80,34 @@ public class Mat4 {
 		m.put(2, -s).put(8, s);
 	}
 	
+	public void rotateZ(double radians) {
+		float c = (float) Math.cos(radians);
+		float s = (float) Math.sin(radians);
+		// good compared to OpenGL results
+		m.put(0, c).put(5, c);
+		m.put(1, s).put(4, -s);
+	}
+	
+	public Vec3 getAxis(int axis) {
+		if(axis < 0 || axis > 2) {
+			throw new IllegalArgumentException("Axis must be between 0 & 2 inclusive");
+		}
+		Vec3 v = new Vec3();
+		return getAxisImpl(axis, v);
+	}
+	
+	public Vec3 getAxis(int axis, Vec3 out) {
+		if(axis < 0 || axis > 2) {
+			throw new IllegalArgumentException("Axis must be between 0 & 2 inclusive");
+		}
+		return getAxisImpl(axis, out);
+	}
+	
+	private Vec3 getAxisImpl(int axis, Vec3 out) {
+		// XXX might be wrong. if so, change to axis * 4 + i
+		return out.set(m.get(axis), m.get(axis + 4), m.get(axis + 8));
+	}
+	
 	public float determinant() {
 		// XXX needs checked somehow
 		float det = m.get(0) * m.get(5) * m.get(10) * m.get(15);

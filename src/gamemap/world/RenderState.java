@@ -2,10 +2,6 @@ package gamemap.world;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.nio.FloatBuffer;
-
-import org.lwjgl.BufferUtils;
-
 import com.ehgames.util.GL;
 import com.ehgames.util.Mat4;
 
@@ -29,7 +25,9 @@ public class RenderState {
 		out.set(camera.view);
 	}
 	
-	private static boolean test = true;
+	public boolean isBackgroundThread() {
+		return camera.background;
+	}
 	
 	public void applyCameraFixedFunc() {
 		glMatrixMode(GL_PROJECTION);

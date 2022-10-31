@@ -18,14 +18,15 @@ public class Vec3 {
 		set(x, y, z);
 	}
 	
-	public void set(Vec3 v) {
-		set(v.x, v.y, v.z);
+	public Vec3 set(Vec3 v) {
+		return set(v.x, v.y, v.z);
 	}
 	
-	public void set(float x, float y, float z) {
+	public Vec3 set(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		return this;
 	}
 	
 	public boolean isWithinDistance(Vec3 point, float distance) {
@@ -64,16 +65,33 @@ public class Vec3 {
 	}
 	
 	public Vec3 addInPlace(Vec3 v) {
-		x += v.x;
-		y += v.y;
-		z += v.z;
+		return addInPlace(v.x, v.y, v.z);
+	}
+	
+	public Vec3 addInPlace(float x, float y, float z) {
+		this.x += x;
+		this.y += y;
+		this.z += z;
 		return this;
 	}
 	
 	public void add(Vec3 in, Vec3 out) {
-		out.x = x + in.x;
-		out.y = y + in.y;
-		out.z = z + in.z;
+		out.set(x + in.x, y + in.y, z + in.z);
+	}
+	
+	public Vec3 scale(float f) {
+		return new Vec3(x * f, y * f, z * f);
+	}
+	
+	public Vec3 scaleInPlace(float f) {
+		x *= f;
+		y *= f;
+		z *= f;
+		return this;
+	}
+	
+	public void scale(float f, Vec3 out) {
+		out.set(x * f, y * f, z * f);
 	}
 	
 	@Override

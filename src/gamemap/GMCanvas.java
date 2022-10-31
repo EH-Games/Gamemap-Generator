@@ -22,7 +22,6 @@ class GMCanvas extends AWTGLCanvas {
 	private GL gl;
 	
 	GMCanvas() throws LWJGLException {
-		
 		// TODO need to check for resizes and screen changes to trigger a repaint
 	}
 	
@@ -76,6 +75,9 @@ class GMCanvas extends AWTGLCanvas {
 	@Override
 	protected void paintGL() {
 		handlePotentialResize();
+		if(activeRendering) {
+			Gamemap.handleKeysActive();
+		}
 		
 		World world = Gamemap.activeWorld;
 		if(world != null) {
