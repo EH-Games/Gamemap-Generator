@@ -165,9 +165,15 @@ public class Mat4 {
 	
 	public void transform(Vec3 in, Vec3 out) {
 		// XXX needs checked somehow
+		/*
 		out.x = in.x * m.get(0) + in.y * m.get(4) + in.z * m.get(8) + m.get(12);
 		out.y = in.x * m.get(1) + in.y * m.get(5) + in.z * m.get(9) + m.get(13);
 		out.z = in.x * m.get(2) + in.y * m.get(6) + in.z * m.get(10) + m.get(14);
+		/*/
+		out.x = in.x * m.get(0) + in.y * m.get(1) + in.z * m.get(2) + m.get(12);
+		out.y = in.x * m.get(4) + in.y * m.get(5) + in.z * m.get(6) + m.get(13);
+		out.z = in.x * m.get(8) + in.y * m.get(9) + in.z * m.get(10) + m.get(14);
+		//*/
 	}
 	
 	/*

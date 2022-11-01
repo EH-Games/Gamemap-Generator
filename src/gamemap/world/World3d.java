@@ -26,6 +26,7 @@ public final class World3d extends World {
 		
 		RenderState state = new RenderState(gl, false, camera);
 		if(userSetup != null) {
+			state.globalBounds = root.bounds;
 			userSetup.call(state);
 		}
 		

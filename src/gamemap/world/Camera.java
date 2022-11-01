@@ -26,7 +26,7 @@ public class Camera {
 	boolean			perspective			= false;
 	float			fovY				= (float) Math.toRadians(80);
 
-	private Vec3[]	frustumPoints		= new Vec3[8];
+	Vec3[]			frustumPoints		= new Vec3[8];
 	Mat4			projection			= new Mat4();
 	Mat4			view				= new Mat4();
 	Mat4			rotation			= new Mat4();
@@ -124,9 +124,14 @@ public class Camera {
 		rotateX(Math.toRadians(80));
 	}
 	
+	// having rotation be the same as inverse rotation to fix culling makes no sense
+	// rotation transforms the view frustum into world space
+	// inverse rotation transforms models into view space
+	// they should be opposites to my knowledge -EH (11/1/22)
+	
 	public void rotateX(double rot) {
 		Mat4 tmp = new Mat4();
-		tmp.rotateX(rot);
+		tmp.rotateX(-rot);
 		tmp.mult(rotation, rotation);
 		tmp.rotateX(-rot);
 		tmp.mult(invRotation, invRotation);
@@ -138,7 +143,7 @@ public class Camera {
 	public void rotateY(double rot) {
 		// premultiplying with z gives a much nicer effect than postmultiplying with y
 		Mat4 tmp = new Mat4();
-		tmp.rotateZ(rot);
+		tmp.rotateZ(-rot);
 		rotation.mult(tmp, rotation);
 		tmp.rotateZ(-rot);
 		invRotation.mult(tmp, invRotation);

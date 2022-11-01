@@ -82,17 +82,15 @@ public class AABB {
 	}
 	
 	public boolean intersects2d(AABB other) {
-		//return true;
 		return
 				minX < other.maxX && maxX > other.minX &&
 				minY < other.maxY && maxY > other.minY;
 	}
 	
 	public boolean intersects(AABB other) {
-		return true;
-//		return
-//				minX < other.maxX && maxX > other.minX &&
-//				minY < other.maxY && maxY > other.minY &&
-//				minZ < other.maxZ && maxZ > other.minZ;
+		return
+				minX < other.maxX && maxX > other.minX &&
+				minY < other.maxY && maxY > other.minY &&
+				minZ < other.maxZ && maxZ > other.minZ;
 	}
 }
