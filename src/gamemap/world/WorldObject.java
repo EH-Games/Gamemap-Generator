@@ -1,14 +1,10 @@
 package gamemap.world;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ehgames.util.AABB;
 import com.ehgames.util.GL;
 import com.ehgames.util.Vec3;
 
 import gamemap.ObjectRenderer;
-import gamemap.Texture;
 
 /** A renderable item within the world. */
 public class WorldObject extends WorldItem {
@@ -16,7 +12,6 @@ public class WorldObject extends WorldItem {
 	
 	public final Vec3			position	= new Vec3();
 	public ObjectRenderer		renderer;
-	public Map<String, Texture>	textures	= new HashMap<>();
 	/** Earliest time this object is visible (inclusive) */
 	public int					minTime		= Integer.MIN_VALUE;
 	/** Latest time this object is visible (exclusive) */
@@ -116,6 +111,13 @@ public class WorldObject extends WorldItem {
 			gl.color3f(1, 1, 1);
 			gl.end();
 			gl.enable(GL.TEXTURE_2D);
+		}
+	}
+	
+	@Override
+	public void destroyResources(GL gl) {
+		if(renderer != null) {
+			renderer.destroyResources(gl);
 		}
 	}
 }

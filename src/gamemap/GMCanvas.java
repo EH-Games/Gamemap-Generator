@@ -15,12 +15,13 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 
 class GMCanvas extends AWTGLCanvas {
-	private int width;
-	private int height;
-	private FloatBuffer projection = BufferUtils.createFloatBuffer(16);
-	public boolean activeRendering = true;
-	private GL gl;
-	
+	private int			width;
+	private int			height;
+	private FloatBuffer	projection		= BufferUtils.createFloatBuffer(16);
+	public boolean		activeRendering	= true;
+	private GL			gl;
+	private World		lastWorld;
+
 	GMCanvas() throws LWJGLException {
 		// TODO need to check for resizes and screen changes to trigger a repaint
 	}
@@ -84,6 +85,12 @@ class GMCanvas extends AWTGLCanvas {
 			glClearColor(world.backgroundColor.x, world.backgroundColor.y, world.backgroundColor.z, 1);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			world.render(Gamemap.camera, gl);
+			if(world != lastWorld) {
+				if(lastWorld != null) {
+					lastWorld.destroyResources(gl);
+				}
+				lastWorld = world;
+			}
 		} else {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}

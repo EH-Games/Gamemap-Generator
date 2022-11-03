@@ -17,4 +17,6 @@ public abstract class World {
 	World() {}
 
 	public abstract void render(Camera camera, GL gl);
+	
+	public abstract void destroyResources(GL gl);
 }

@@ -137,6 +137,7 @@ public class RenderState {
 		//glPolygonMode(GL_FRONT, GL_FILL);
 		//glPolygonMode(GL_BACK, GL_LINE);
 		
+		//drawCulling = true;
 		if(camera.perspective && drawCulling) {
 			drawCullingInfo();
 		}

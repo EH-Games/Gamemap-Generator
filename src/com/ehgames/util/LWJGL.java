@@ -2,6 +2,7 @@ package com.ehgames.util;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -167,6 +168,11 @@ public final class LWJGL implements GL {
 	}
 	
 	@Override
+	public int getUniformLocation(int program, String name) {
+		return GL20.glGetUniformLocation(program, name);
+	}
+	
+	@Override
 	public void enable(int cap) {
 		GL11.glEnable(cap);
 	}
@@ -184,6 +190,26 @@ public final class LWJGL implements GL {
 	@Override
 	public void disableClientState(int cap) {
 		GL11.glDisableClientState(cap);
+	}
+
+	@Override
+	public void enableVertexAttribArray(int index) {
+		GL20.glEnableVertexAttribArray(index);
+	}
+
+	@Override
+	public void disableVertexAttribArray(int index) {
+		GL20.glDisableVertexAttribArray(index);
+	}
+
+	@Override
+	public void enableVertexArrayAttrib(int vaobj, int index) {
+		GL45.glEnableVertexArrayAttrib(vaobj, index);
+	}
+
+	@Override
+	public void disableVertexArrayAttrib(int vaobj, int index) {
+		GL45.glDisableVertexArrayAttrib(vaobj, index);
 	}
 
 	@Override
@@ -210,6 +236,11 @@ public final class LWJGL implements GL {
 	public void loadMatrixf(FloatBuffer matrix) {
 		GL11.glLoadMatrix(matrix);
 	}
+	
+	@Override
+	public void matrixMode(int mode) {
+		GL11.glMatrixMode(mode);
+	}
 
 	@Override
 	public void drawArrays(int mode, int first, int count) {
@@ -229,6 +260,16 @@ public final class LWJGL implements GL {
 	@Override
 	public void bindTexture(int target, int texture) {
 		GL11.glBindTexture(target, texture);
+	}
+
+	@Override
+	public void bindTextures(int first, int count, IntBuffer textures) {
+		GL44.glBindTextures(first, count, textures);
+	}
+
+	@Override
+	public void activeTexture(int texture) {
+		GL13.glActiveTexture(texture);
 	}
 
 	@Override

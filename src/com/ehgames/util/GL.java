@@ -2,10 +2,13 @@ package com.ehgames.util;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL30;
 
 public interface GL {
 	public static final int	POINTS						= 0;		// GL11.GL_POINTS;
@@ -14,6 +17,12 @@ public interface GL {
 	public static final int	LINE_STRIP					= 3;		// GL11.GL_LINE_STRIP;
 	public static final int	TRIANGLES					= 4;		// GL11.GL_TRIANGLES;
 	public static final int	TRIANGLE_STRIP				= 5;		// GL11.GL_TRIANGLE_STRIP;
+	
+	public static final int	CULL_FACE					= 0xB44;
+	
+	public static final int	MODELVIEW					= 0x1700;	// GL11.GL_MODELVIEW;
+	public static final int	PROJECTION					= 0x1701;	// GL11.GL_PROJECTION;
+	public static final int	TEXTURE						= 0x1702;	// GL11.GL_TEXTURE;
 
 	public static final int	TEXTURE_MAG_FILTER			= 0x2800;	// GL11.GL_TEXTURE_MAG_FILTER;
 	public static final int	TEXTURE_MIN_FILTER			= 0x2801;	// GL11.GL_TEXTURE_MIN_FILTER;
@@ -22,6 +31,7 @@ public interface GL {
 	public static final int	LINEAR						= 0x2601;	// GL11.GL_LINEAR;
 
 	public static final int	TEXTURE_2D					= 0xDE1;	// GL11.GL_TEXTURE_2D;
+	public static final int	TEXTURE0					= 0x84C0;	// GL13.GL_TEXTURE0;
 
 	public static final int	RGB							= 0x1907;	// GL11.GL_RGB;
 	public static final int	RGBA						= 0x1908;	// GL11.GL_RGBA;
@@ -33,11 +43,19 @@ public interface GL {
 	public static final int	ELEMENT_ARRAY_BUFFER		= 0x8893;	// GL15.GL_ELEMENT_ARRAY_BUFFER;
 	
 	public static final int VERTEX_ARRAY				= 0x8074;	// GL11.GL_VERTEX_ARRAY;
+	public static final int NORMAL_ARRAY				= 0x8075;	// GL11.GL_NORMAL_ARRAY;
+	public static final int COLOR_ARRAY					= 0x8076;	// GL11.GL_COLOR_ARRAY;
 	public static final int TEXTURE_COORD_ARRAY			= 0x8078;	// GL11.GL_TEXTURE_COORD_ARRAY;
 
+	public static final int HALF_FLOAT					= 0x140B;	// GL30.GL_HALF_FLOAT;
 	public static final int	FLOAT						= 0x1406;	// GL11.GL_FLOAT;
-	public static final int UNSIGNED_INT				= 0x1405;	// GL11.GL_UNSIGNED_INT;
+	public static final int	DOUBLE						= 0x140A;	// GL11.GL_DOUBLE;
+	public static final int	BYTE						= 0x1400;	// GL11.GL_BYTE;
 	public static final int	UNSIGNED_BYTE				= 0x1401;	// GL11.GL_UNSIGNED_BYTE;
+	public static final int SHORT						= 0x1402;	// GL11.GL_SHORT;
+	public static final int	UNSIGNED_SHORT				= 0x1403;	// GL11.GL_UNSIGNED_SHORT;
+	public static final int	INT							= 0x1404;	// GL11.GL_INT;
+	public static final int UNSIGNED_INT				= 0x1405;	// GL11.GL_UNSIGNED_INT;
 	public static final int	UNSIGNED_INT_8_8_8_8_REV	= 0x8367;
 
 	//static int a = GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
@@ -102,6 +120,8 @@ public interface GL {
 	
 	public int getAttribLocation(int program, String name);
 	
+	public int getUniformLocation(int program, String name);
+	
 	public void pushMatrix();
 	
 	public void popMatrix();
@@ -111,6 +131,8 @@ public interface GL {
 	public void multMatrixf(FloatBuffer matrix);
 	
 	public void loadMatrixf(FloatBuffer matrix);
+	
+	public void matrixMode(int mode);
 	
 	/**
 	 * 
@@ -132,12 +154,24 @@ public interface GL {
 	
 	public void disableClientState(int cap);
 	
+	public void enableVertexAttribArray(int index);
+	
+	public void disableVertexAttribArray(int index);
+	
+	public void enableVertexArrayAttrib(int vaobj, int index);
+	
+	public void disableVertexArrayAttrib(int vaobj, int index);
+	
 	/**
 	 * 
 	 * @param target Specifies the target to which the texture is bound. Must be either TEXTURE_1D, TEXTURE_2D, TEXTURE_3D, or TEXTURE_CUBE_MAP.
 	 * @param texture Specifies the name of a texture.
 	 */
 	public void bindTexture(int target, int texture);
+	
+	public void bindTextures(int first, int count, IntBuffer textures);
+	
+	public void activeTexture(int texture);
 	
 	public int genTexture();
 	

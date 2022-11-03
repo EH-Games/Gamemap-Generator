@@ -437,6 +437,7 @@ public class Gamemap {
 							e.printStackTrace();
 						}
 					}
+					System.out.println("World loading complete");
 					// TODO reenable loading buttons 
 				});
 			}

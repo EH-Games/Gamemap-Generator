@@ -1,6 +1,7 @@
 package gamemap.world;
 
 import com.ehgames.util.AABB;
+import com.ehgames.util.GL;
 
 public abstract class WorldItem {
 	/** The bounds of this object, used for culling */
@@ -38,4 +39,5 @@ public abstract class WorldItem {
 	public abstract void testVisibility(Camera camera);
 	public abstract void testVisibility2d(Camera camera);
 	public abstract void render(RenderState state);
+	public abstract void destroyResources(GL gl);
 }

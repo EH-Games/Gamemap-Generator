@@ -3,6 +3,8 @@ package gamemap.world;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ehgames.util.GL;
+
 /** A list of renderable objects within the world */
 public final class WorldGroup extends WorldItem {
 	public List<WorldItem> objects = new ArrayList<>();
@@ -76,6 +78,13 @@ public final class WorldGroup extends WorldItem {
 					obj.render(state);
 				}
 			}
+		}
+	}
+	
+	@Override
+	public void destroyResources(GL gl) {
+		for(WorldItem obj : objects) {
+			obj.destroyResources(gl);
 		}
 	}
 }

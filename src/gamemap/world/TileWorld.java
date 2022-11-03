@@ -13,4 +13,9 @@ public final class TileWorld extends World {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void destroyResources(GL gl) {
+		// TODO destroy any loaded tiles
+	}
 }

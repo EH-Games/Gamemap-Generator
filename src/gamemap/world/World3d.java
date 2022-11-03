@@ -40,4 +40,12 @@ public final class World3d extends World {
 			root.render(state);
 		}
 	}
+	
+	@Override
+	public void destroyResources(GL gl) {
+		root.destroyResources(gl);
+		if(userSetup != null) {
+			userSetup.destroyResources(gl);
+		}
+	}
 }
