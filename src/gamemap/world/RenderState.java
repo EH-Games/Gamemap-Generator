@@ -36,8 +36,8 @@ public class RenderState {
 	}
 	
 	private void drawXAt(float x, float y, float scale) {
-		x = 50 + (camera.position.x - globalBounds.minX) * scale;
-		y = 50 + (globalBounds.maxY - camera.position.y) * scale;
+		x = 50 + (camera.position.x - globalBounds.min.x) * scale;
+		y = 50 + (globalBounds.max.y - camera.position.y) * scale;
 		glVertex2f(x - 3, y - 3);
 		glVertex2f(x + 3, y + 3);
 		glVertex2f(x - 3, y + 3);
@@ -64,8 +64,8 @@ public class RenderState {
 		// boundaries of all content
 		float left = 50;
 		float top = 50;
-		float height = globalBounds.maxY - globalBounds.minY;
-		float width = globalBounds.maxX - globalBounds.minX;
+		float height = globalBounds.getHeight();
+		float width = globalBounds.getWidth();
 		float scale = 500 / height;
 		float btm = top + height * scale;
 		float right = left + width * scale;
@@ -81,11 +81,11 @@ public class RenderState {
 		
 		// boundaries of frustum
 		glColor3f(0, 1, 0);
-		width = camera.bounds.maxX - camera.bounds.minX;
-		height = camera.bounds.maxY - camera.bounds.minY;
-		left = 50 + (camera.bounds.minX - globalBounds.minX) * scale;
+		width = camera.bounds.getWidth();
+		height = camera.bounds.getHeight();
+		left = 50 + (camera.bounds.min.x - globalBounds.min.x) * scale;
 		right = left + width * scale;
-		top = 50 + (globalBounds.maxY - camera.bounds.maxY) * scale;
+		top = 50 + (globalBounds.max.y - camera.bounds.max.y) * scale;
 		btm = top + height * scale;
 		glVertex2f(left, top);
 		glVertex2f(left, btm);
@@ -127,8 +127,6 @@ public class RenderState {
 //		glRotatef(45, 0, 0, 1);
 		
 		glEnable(GL_CULL_FACE);
-		//glDisable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glClearDepth(1);
@@ -137,7 +135,7 @@ public class RenderState {
 		//glPolygonMode(GL_FRONT, GL_FILL);
 		//glPolygonMode(GL_BACK, GL_LINE);
 		
-		//drawCulling = true;
+		//drawCulling = false;
 		if(camera.perspective && drawCulling) {
 			drawCullingInfo();
 		}

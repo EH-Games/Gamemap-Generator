@@ -98,11 +98,11 @@ public class WorldObject extends WorldItem {
 			gl.begin(GL.LINE_LOOP);
 			gl.color3f(1, 0, 0);
 			AABB box = state.object.bounds;
-			float z = box.maxZ + 1;
-			gl.vertex3f(box.minX, box.minY, z);
-			gl.vertex3f(box.maxX, box.minY, z);
-			gl.vertex3f(box.maxX, box.maxY, z);
-			gl.vertex3f(box.minX, box.maxY, z);
+			float z = box.max.z + 1;
+			gl.vertex3f(box.min.x, box.min.y, z);
+			gl.vertex3f(box.max.x, box.min.y, z);
+			gl.vertex3f(box.max.x, box.max.y, z);
+			gl.vertex3f(box.min.x, box.max.y, z);
 			gl.end();
 			gl.begin(GL.POINTS);
 			Vec3 pos = state.object.position;

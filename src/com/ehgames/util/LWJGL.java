@@ -18,6 +18,21 @@ public final class LWJGL implements GL {
 		//GL11.glGet
 		return false;
 	}
+	
+	@Override
+	public int getError() {
+		return GL11.glGetError();
+	}
+	
+	@Override
+	public int getInteger(int pname) {
+		return GL11.glGetInteger(pname);
+	}
+
+	@Override
+	public void getFloatv(int pname, FloatBuffer params) {
+		GL11.glGetFloat(pname, params);
+	}
 
 	@Override
 	public void begin(int mode) {
@@ -235,6 +250,11 @@ public final class LWJGL implements GL {
 	@Override
 	public void loadMatrixf(FloatBuffer matrix) {
 		GL11.glLoadMatrix(matrix);
+	}
+	
+	@Override
+	public void loadIdentity() {
+		GL11.glLoadIdentity();
 	}
 	
 	@Override

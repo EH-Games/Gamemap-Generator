@@ -7,6 +7,7 @@ import java.nio.IntBuffer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
@@ -19,18 +20,28 @@ public interface GL {
 	public static final int	TRIANGLE_STRIP				= 5;		// GL11.GL_TRIANGLE_STRIP;
 	
 	public static final int	CULL_FACE					= 0xB44;
+	public static final int	DEPTH_TEST					= 0xB71;	// GL11.GL_DEPTH_TEST;
 	
 	public static final int	MODELVIEW					= 0x1700;	// GL11.GL_MODELVIEW;
 	public static final int	PROJECTION					= 0x1701;	// GL11.GL_PROJECTION;
 	public static final int	TEXTURE						= 0x1702;	// GL11.GL_TEXTURE;
+	
+	public static final int	MODELVIEW_MATRIX			= 0xBA6;	// GL11.GL_MODELVIEW_MATRIX;
 
 	public static final int	TEXTURE_MAG_FILTER			= 0x2800;	// GL11.GL_TEXTURE_MAG_FILTER;
 	public static final int	TEXTURE_MIN_FILTER			= 0x2801;	// GL11.GL_TEXTURE_MIN_FILTER;
+	public static final int	TEXTURE_WRAP_S				= 0x2802;	// GL11.GL_TEXTURE_WRAP_S;
+	public static final int	TEXTURE_WRAP_T				= 0x2803;	// GL11.GL_TEXTURE_WRAP_T;
 	
 	public static final int	NEAREST						= 0x2600;	// GL11.GL_NEAREST;
 	public static final int	LINEAR						= 0x2601;	// GL11.GL_LINEAR;
+	public static final int REPEAT						= 0x2901;	// GL11.GL_REPEAT;
+	public static final int	MIRRORED_REPEAT				= 0x8370;	// GL14.GL_MIRRORED_REPEAT;
+	public static final int	CLAMP_TO_BORDER				= 0x812D;	// GL13.GL_CLAMP_TO_BORDER;
+	public static final int CLAMP_TO_EDGE				= 0x812F;	// GL12.GL_CLAMP_TO_EDGE;
 
 	public static final int	TEXTURE_2D					= 0xDE1;	// GL11.GL_TEXTURE_2D;
+	public static final int	TEXTURE_BINDING_2D			= 0x8069;	// GL11.GL_TEXTURE_BINDING_2D;
 	public static final int	TEXTURE0					= 0x84C0;	// GL13.GL_TEXTURE0;
 
 	public static final int	RGB							= 0x1907;	// GL11.GL_RGB;
@@ -58,9 +69,18 @@ public interface GL {
 	public static final int UNSIGNED_INT				= 0x1405;	// GL11.GL_UNSIGNED_INT;
 	public static final int	UNSIGNED_INT_8_8_8_8_REV	= 0x8367;
 
-	//static int a = GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
+	public static final int	NO_ERROR					= 0;		// GL11.GL_NO_ERROR;
+	public static final int INVALID_ENUM				= 0x500;	// GL11.GL_INVALID_ENUM;
+	public static final int	INVALID_VALUE				= 0x501;	// GL11.GL_INVALID_VALUE;
+	public static final int	INVALID_OPERATION			= 0x502;	// GL11.GL_INVALID_OPERATION;
 
 	public boolean isCoreProfile();
+	
+	public int getError();
+	
+	public int getInteger(int pname);
+	
+	public void getFloatv(int pname, FloatBuffer params);
 
 	public void begin(int mode);
 	
@@ -131,6 +151,8 @@ public interface GL {
 	public void multMatrixf(FloatBuffer matrix);
 	
 	public void loadMatrixf(FloatBuffer matrix);
+	
+	public void loadIdentity();
 	
 	public void matrixMode(int mode);
 	

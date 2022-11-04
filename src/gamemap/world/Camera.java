@@ -81,8 +81,8 @@ public class Camera {
 			
 			buildFrustum(aspect);
 		} else {
-			bounds.minZ = -ORTHO_Z_VAL;
-			bounds.maxZ = ORTHO_Z_VAL;
+			bounds.min.z = -ORTHO_Z_VAL;
+			bounds.max.z = ORTHO_Z_VAL;
 		}
 		rebuildBounds = true;
 		calculateBounds();
@@ -230,10 +230,10 @@ public class Camera {
 			// then the bounds should be 360 units wide, hence division
 			final float xHalf = (float) (halfWidth / pixelsPerUnit);
 			final float yHalf = (float) (halfHeight / pixelsPerUnit);
-			bounds.minX = position.x - xHalf;
-			bounds.maxX = position.x + xHalf;
-			bounds.maxY = position.y + yHalf;
-			bounds.minY = position.y - yHalf;
+			bounds.min.x = position.x - xHalf;
+			bounds.max.x = position.x + xHalf;
+			bounds.max.y = position.y + yHalf;
+			bounds.min.y = position.y - yHalf;
 			
 			projection.setOrtho(-xHalf, xHalf, -yHalf, yHalf, -ORTHO_Z_VAL, ORTHO_Z_VAL);
 			view.setIdentity();
