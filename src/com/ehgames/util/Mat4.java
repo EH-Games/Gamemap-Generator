@@ -63,6 +63,26 @@ public class Mat4 {
 		}).clear();
 	}
 	
+	public void setTranslation(Vec3 v) {
+		setTranslation(v.x, v.y, v.z);
+	}
+	
+	public void setTranslation(float x, float y, float z) {
+		setIdentity();
+		m.put(12, x).put(13, y).put(14, z);
+	}
+	
+	public Mat4 translate(Vec3 v) {
+		return translate(v.x, v.y, v.z);
+	}
+	
+	public Mat4 translate(float x, float y, float z) {
+		Mat4 tmp = new Mat4();
+		tmp.setTranslation(x, y, z);
+		mult(tmp, tmp);
+		return tmp;
+	}
+	
 	public void rotateX(double radians) {
 		float c = (float) Math.cos(radians);
 		float s = (float) Math.sin(radians);

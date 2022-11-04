@@ -39,12 +39,16 @@ public class Gamemap {
 	private static GMCanvas					canvas;
 	private static Config					config			= new Config();
 
-	static int								zoomLevel		= 0;
+	private static int						zoomLevel		= 0;
 	static Camera							camera			= new Camera();
 	static World							activeWorld		= null;
 
 	private static Map<FileFilter, Plugin>	pluginsByFilter	= new HashMap<>();
 	private static JFileChooser				fileChooser;
+	private static ExportDialog				exportDialog;
+	
+	private static MenuItem					itemExport;
+	private static MenuItem					itemOpen;
 
 	private static int						mouseX, mouseY;
 
@@ -204,10 +208,17 @@ public class Gamemap {
 		}
 		return INVALID_AXIS;
 	}
+	
+	static void setWorldLocked(boolean locked) {
+		itemOpen.setEnabled(!locked);
+		itemExport.setEnabled(!locked);
+	}
 
 	private static Frame createFrame() throws LWJGLException {
 		Frame frame = new Frame();
 		frame.setTitle(APP_NAME);
+		
+		exportDialog = new ExportDialog(frame);
 
 		MenuBar menus = createMenus();
 		frame.setMenuBar(menus);
@@ -343,8 +354,13 @@ public class Gamemap {
 		MenuBar menus = new MenuBar();
 
 		Menu file = new Menu("File");
-		createMenuItem("Open Game World...", file).addActionListener(e -> showFileChooser());
-		createMenuItem("Render Map", file);
+		itemOpen = createMenuItem("Open Game World...", file);
+		itemOpen.addActionListener(e -> showFileChooser());
+		itemExport = createMenuItem("Render Map", file);
+		itemExport.setEnabled(false);
+		itemExport.addActionListener(e -> {
+			exportDialog.showDialogFor(activeWorld);
+		});
 		file.addSeparator();
 		createMenuItem("Exit", file).addActionListener(e -> attemptToExit());
 		menus.add(file);
@@ -398,7 +414,7 @@ public class Gamemap {
 		} else {
 			int result = fileChooser.showOpenDialog(frame);
 			if(result == JFileChooser.APPROVE_OPTION) {
-				// TODO disable loading buttons
+				setWorldLocked(true);
 				final File file = fileChooser.getSelectedFile();
 				CompletableFuture.supplyAsync(() -> getPluginForFile(file)).thenApplyAsync(worlds -> {
 					if(worlds == null) {
@@ -438,7 +454,7 @@ public class Gamemap {
 						}
 					}
 					System.out.println("World loading complete");
-					// TODO reenable loading buttons 
+					setWorldLocked(false); 
 				});
 			}
 		}

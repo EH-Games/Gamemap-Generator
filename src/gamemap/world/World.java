@@ -12,6 +12,9 @@ public abstract class World {
 	public final Vec3	initialPos		= new Vec3();
 	public int			defaultArea		= 0;
 	public int			areaCount		= 1;
+	
+	// value is used for exported json but not for rendering
+	public boolean		positiveYIsDown	= false;
 
 	// package protected so theres no funny subclasses
 	World() {}

@@ -218,10 +218,7 @@ public class Camera {
 				transformed.addInPlace(position);
 				bounds.add(transformed);
 			}
-			view.setIdentity();
-			view.m.put(12, -position.x);
-			view.m.put(13, -position.y);
-			view.m.put(14, -position.z);
+			view.setTranslation(-position.x, -position.y, -position.z);
 			invRotation.mult(view, view);
 		} else {
 			// min and max z assumed to already be set to
@@ -236,9 +233,7 @@ public class Camera {
 			bounds.min.y = position.y - yHalf;
 			
 			projection.setOrtho(-xHalf, xHalf, -yHalf, yHalf, -ORTHO_Z_VAL, ORTHO_Z_VAL);
-			view.setIdentity();
-			view.m.put(12, -position.x);
-			view.m.put(13, -position.y);
+			view.setTranslation(-position.x, -position.y, 0);
 		}
 	}
 	
