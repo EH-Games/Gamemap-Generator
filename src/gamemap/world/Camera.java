@@ -6,12 +6,15 @@ import com.ehgames.util.AABB;
 import com.ehgames.util.Mat4;
 import com.ehgames.util.Vec3;
 
+import gamemap.ExportTask;
+
 public class Camera {
 	private static final float					ORTHO_Z_VAL		= 2000;
+	private static final int					MAX_CAMERAS		= Integer.SIZE - 1;
 	private static final LinkedList<Integer>	FREE_CAMERAS	= new LinkedList<>();
 
 	static {
-		for(int i = 0; i < 28; i++) {
+		for(int i = 0; i < MAX_CAMERAS; i++) {
 			FREE_CAMERAS.add(1 << i);
 		}
 	}
@@ -194,7 +197,7 @@ public class Camera {
 		return pixelsPerUnit;
 	}
 
-	void copyWorldProperties(Camera camera) {
+	public void copyWorldProperties(Camera camera) {
 		areaFlag = camera.areaFlag;
 		time = camera.time;
 	}
@@ -207,6 +210,20 @@ public class Camera {
 		
 		halfWidth = camera.halfWidth;
 		halfHeight = camera.halfHeight;
+	}
+	
+	public void setupFromExporter(ExportTask task) {
+		bounds.min.set(task.minX, task.minY, -ORTHO_Z_VAL);
+		bounds.max.set(task.maxX, task.maxY, ORTHO_Z_VAL);
+
+		float xHalf = (bounds.max.x - bounds.min.x) / 2;
+		float yHalf = (bounds.max.y - bounds.min.y) / 2;
+		
+		position.x = bounds.min.x + xHalf;
+		position.y = bounds.min.y + yHalf;
+		
+		projection.setOrtho(-xHalf, xHalf, -yHalf, yHalf, -ORTHO_Z_VAL, ORTHO_Z_VAL);
+		view.setTranslation(-position.x, -position.y, 0);
 	}
 	
 	void calculateBounds() {

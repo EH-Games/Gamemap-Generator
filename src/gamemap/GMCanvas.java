@@ -10,21 +10,14 @@ import gamemap.world.World;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.nio.FloatBuffer;
-
-import org.lwjgl.BufferUtils;
-
 class GMCanvas extends AWTGLCanvas {
 	private int			width;
 	private int			height;
-	private FloatBuffer	projection		= BufferUtils.createFloatBuffer(16);
 	public boolean		activeRendering	= true;
 	private GL			gl;
 	private World		lastWorld;
 
-	GMCanvas() throws LWJGLException {
-		// TODO need to check for resizes and screen changes to trigger a repaint
-	}
+	GMCanvas() throws LWJGLException {}
 	
 	@Override
 	protected void initGL() {
@@ -45,32 +38,9 @@ class GMCanvas extends AWTGLCanvas {
 			//System.out.println("Window resized to " + width + " x " + height);
 			
 			glViewport(0, 0, width, height);
-			
-			rebuildPerspective();
 
 			Gamemap.camera.onViewportResize(width, height);
 		}
-	}
-	
-	private void rebuildPerspective() {
-		double h = height == 0 ? 1 : height;
-		double aspect = width / h;
-		
-		// I borrowed all this code from another project of mine
-		double fov = 120;
-		float nearClip = 0.9f;
-		float farClip = 2000;
-		
-		double f = Math.toRadians(fov * aspect / 2);
-		projection.put(0, (float) (f / aspect));
-		projection.put(5, (float) f);
-		float zRange = (nearClip - farClip);
-		projection.put(10, (nearClip + farClip) / zRange);
-		projection.put(11, -1);
-		projection.put(14, (2 * nearClip * farClip) / zRange);
-		
-		projection.put(0, (float) (f / aspect));
-		projection.put(5, (float) f);
 	}
 	
 	@Override
@@ -104,23 +74,5 @@ class GMCanvas extends AWTGLCanvas {
 		if(activeRendering) {
 			repaint();
 		}
-	}
-
-	public static void drawTestObjectAt(float x, float y, float z) {
-		glPushMatrix();
-		glTranslatef(x, y, z);
-		drawTestObject();
-		glPopMatrix();
-	}
-	
-	public static void drawTestObject() {
-		glBegin(GL_TRIANGLES);
-		glColor3f(1, 0, 0);
-		glVertex2f(0, 0.5f);
-		glColor3f(0, 1, 0);
-		glVertex2f(-0.5f, -0.5f);
-		glColor3f(0, 0, 1);
-		glVertex2f(0.5f, -0.5f);
-		glEnd();
 	}
 }

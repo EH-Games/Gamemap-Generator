@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
@@ -36,7 +37,7 @@ public class Gamemap {
 	private static final boolean[]			KEY_STATES		= new boolean[1024];
 
 	private static Frame					frame;
-	private static GMCanvas					canvas;
+	static GMCanvas							canvas;
 	private static Config					config			= new Config();
 
 	private static int						zoomLevel		= 0;
@@ -56,6 +57,7 @@ public class Gamemap {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch(UnsupportedLookAndFeelException | ReflectiveOperationException e) {}
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		
 		// needs to come here so it gets l&f set
 		fileChooser = new JFileChooser();
