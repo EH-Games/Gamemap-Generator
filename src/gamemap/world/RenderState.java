@@ -17,6 +17,12 @@ public class RenderState {
 	final Camera			camera;
 	public WorldObject		object;
 
+	/**
+	 * Variable that plugins can use to pass data to renderers.<br>
+	 * Do so by setting the variable using the {@link #World3d.userSetup}
+	 */
+	public Object userData;
+
 	RenderState(GL gl, boolean transparent, Camera camera) {
 		this.gl = gl;
 		this.transparent = transparent;
@@ -42,7 +48,6 @@ public class RenderState {
 		glVertex2f(x + 3, y + 3);
 		glVertex2f(x - 3, y + 3);
 		glVertex2f(x + 3, y - 3);
-		
 	}
 	
 	private void drawXAt(Vec3 v, float scale) {

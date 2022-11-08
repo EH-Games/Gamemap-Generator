@@ -40,7 +40,7 @@ public class AABB {
 	}
 	
 	/**
-	 * Sets up this AABB so that calling {@code add} on it with another AABB
+	 * Sets up this AABB so that calling {@link #add} on it with another AABB
 	 * will result in a copy of that AABB.
 	 */
 	public void prepForBuild() {

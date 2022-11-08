@@ -56,6 +56,8 @@ public class ExportThread extends Thread {
 		camera.setupFromExporter(task);
 		
 		int framebuffer = GL45.glCreateFramebuffers();
+		// should probably change to renderbuffers, but when I tried that once for depthbuffer
+		// it broke stuff on the main thread. maybe I accidentally deleted some other texture
 		int colorbuffer = GL45.glCreateTextures(GL11.GL_TEXTURE_2D);
 		int depthbuffer = GL45.glCreateTextures(GL11.GL_TEXTURE_2D);
 		GL45.glTextureStorage2D(colorbuffer, 1, GL11.GL_RGBA8, task.pixelWidth, task.pixelHeight);
@@ -113,7 +115,6 @@ public class ExportThread extends Thread {
 
 		GL11.glClearColor(0, 0, 0, 0);
 		GL11.glClearDepth(1);
-		//GL43.glDebugMessageCallback(new KHRDebugCallback());
 		
 		while(true) {
 			synchronized(taskList) {

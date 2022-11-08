@@ -36,7 +36,9 @@ public final class World3d extends World {
 			camera.layerFlag = 1 << firstLayer;
 			root.render(state);
 		}
+		Object userData = state.userData;
 		state = new RenderState(gl, true, camera);
+		state.userData = userData;
 		for(int layer = firstLayer; layer <= lastLayer; layer++) {
 			camera.layerFlag = 1 << firstLayer;
 			root.render(state);
