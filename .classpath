@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Gson 2.8.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LWJGL 2.9.3"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LZ4-Java 1.8.0"/>
 	<classpathentry kind="lib" path="lib/structlib.jar" sourcepath="../../EHNext/StructLib/src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

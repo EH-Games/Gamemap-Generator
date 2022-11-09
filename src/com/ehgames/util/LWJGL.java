@@ -243,6 +243,31 @@ public final class LWJGL implements GL {
 	}
 
 	@Override
+	public void translated(double x, double y, double z) {
+		GL11.glTranslated(x, y, z);
+	}
+
+	@Override
+	public void scalef(float x, float y, float z) {
+		GL11.glScalef(x, y, z);
+	}
+
+	@Override
+	public void scaled(double x, double y, double z) {
+		GL11.glScaled(x, y, z);
+	}
+
+	@Override
+	public void rotatef(float angle, float x, float y, float z) {
+		GL11.glRotatef(angle, x, y, z);
+	}
+
+	@Override
+	public void rotated(double angle, double x, double y, double z) {
+		GL11.glRotated(angle, x, y, z);
+	}
+
+	@Override
 	public void multMatrixf(FloatBuffer matrix) {
 		GL11.glMultMatrix(matrix);
 	}

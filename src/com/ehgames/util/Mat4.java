@@ -63,6 +63,15 @@ public class Mat4 {
 		}).clear();
 	}
 	
+	public void setScale(Vec3 v) {
+		setScale(v.x, v.y, v.z);
+	}
+	
+	public void setScale(float x, float y, float z) {
+		setIdentity();
+		m.put(0, x).put(5, y).put(10, z);
+	}
+	
 	public void setTranslation(Vec3 v) {
 		setTranslation(v.x, v.y, v.z);
 	}
@@ -81,6 +90,16 @@ public class Mat4 {
 		tmp.setTranslation(x, y, z);
 		mult(tmp, tmp);
 		return tmp;
+	}
+	
+	public void translateInPlace(Vec3 v) {
+		translateInPlace(v.x, v.y, v.z);
+	}
+	
+	public void translateInPlace(float x, float y, float z) {
+		Mat4 tmp = new Mat4();
+		tmp.setTranslation(x, y, z);
+		multInPlace(tmp);
 	}
 	
 	public void rotateX(double radians) {
@@ -106,6 +125,30 @@ public class Mat4 {
 		// good compared to OpenGL results
 		m.put(0, c).put(5, c);
 		m.put(1, s).put(4, -s);
+	}
+	
+	public void setRotation(double radians, float x, float y, float z) {
+		float s = (float) Math.sin(radians);
+		float c = (float) Math.cos(radians);
+		float ic = 1 - c;
+		m.clear();
+		m.put(x * x * ic + c).put(x * y * ic + s * z).put(x * z * ic - s * y).put(0);
+		m.put(y * x * ic - s * z).put(y * y * ic + c).put(y * z * ic + s * x).put(0);
+		m.put(z * x * ic + s * y).put(z * y * ic - x * s).put(z * z * ic + c).put(0);
+		m.put(0).put(0).put(0).put(1).clear();
+	}
+	
+	public Mat4 rotate(double radians, float x, float y, float z) {
+		Mat4 mat = new Mat4();
+		mat.setRotation(radians, x, y, z);
+		mult(mat, mat);
+		return mat;
+	}
+	
+	public void rotateInPlace(double radians, float x, float y, float z) {
+		Mat4 mat = new Mat4();
+		mat.setRotation(radians, x, y, z);
+		multInPlace(mat);
 	}
 	
 	public Vec3 getAxis(int axis) {
@@ -175,6 +218,10 @@ public class Mat4 {
 				out.m.put((col << 2) + row, val);
 			}
 		}
+	}
+	
+	public void multInPlace(Mat4 mat) {
+		mult(mat, this);
 	}
 	
 	public Vec3 transform(Vec3 in) {

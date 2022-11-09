@@ -272,6 +272,16 @@ public interface GL {
 	
 	public void translatef(float x, float y, float z);
 	
+	public void translated(double x, double y, double z);
+	
+	public void scalef(float x, float y, float z);
+	
+	public void scaled(double x, double y, double z);
+	
+	public void rotatef(float angle, float x, float y, float z);
+	
+	public void rotated(double angle, double x, double y, double z);
+	
 	public void multMatrixf(FloatBuffer matrix);
 	
 	public void loadMatrixf(FloatBuffer matrix);
