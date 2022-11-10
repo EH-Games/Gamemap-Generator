@@ -13,6 +13,7 @@ public class RenderState {
 	AABB					globalBounds;
 	
 	public final GL			gl;
+	public final World		world;
 	public final boolean	transparent;
 	final Camera			camera;
 	public WorldObject		object;
@@ -23,10 +24,11 @@ public class RenderState {
 	 */
 	public Object userData;
 
-	RenderState(GL gl, boolean transparent, Camera camera) {
+	RenderState(GL gl, boolean transparent, Camera camera, World world) {
 		this.gl = gl;
 		this.transparent = transparent;
 		this.camera = camera;
+		this.world = world;
 	}
 	
 	public void getCameraPerspective(Mat4 out) {
@@ -39,6 +41,10 @@ public class RenderState {
 	
 	public boolean isBackgroundThread() {
 		return camera.background;
+	}
+	
+	public boolean isTopDown() {
+		return !camera.perspective;
 	}
 	
 	private void drawXAt(float x, float y, float scale) {
@@ -122,6 +128,8 @@ public class RenderState {
 	}
 	
 	public void applyCameraFixedFunc() {
+		gl.useProgram(0);
+		
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrix(camera.projection.m);
 		glMatrixMode(GL_MODELVIEW);
@@ -137,6 +145,7 @@ public class RenderState {
 		glClearDepth(1);
 		glEnable(GL_ALPHA_TEST);
 		glAlphaFunc(GL_GREATER, 0);
+		gl.activeTexture(GL.TEXTURE0);
 		//glPolygonMode(GL_FRONT, GL_FILL);
 		//glPolygonMode(GL_BACK, GL_LINE);
 		

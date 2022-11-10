@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL41;
 import org.lwjgl.opengl.GL44;
 import org.lwjgl.opengl.GL45;
 
@@ -32,6 +33,26 @@ public final class LWJGL implements GL {
 	@Override
 	public void getFloatv(int pname, FloatBuffer params) {
 		GL11.glGetFloat(pname, params);
+	}
+	
+	@Override
+	public void depthFunc(int func) {
+		GL11.glDepthFunc(func);
+	}
+
+	@Override
+	public void clearDepth(double depth) {
+		GL11.glClearDepth(depth);
+	}
+
+	@Override
+	public void clearDepthf(float depth) {
+		GL41.glClearDepthf(depth);
+	}
+
+	@Override
+	public void alphaFunc(int func, float ref) {
+		GL11.glAlphaFunc(func, ref);
 	}
 
 	@Override
@@ -183,6 +204,51 @@ public final class LWJGL implements GL {
 	}
 	
 	@Override
+	public void uniform1f(int location, float v0) {
+		GL20.glUniform1f(location, v0);
+	}
+	
+	@Override
+	public void uniform2f(int location, float v0, float v1) {
+		GL20.glUniform2f(location, v0, v1);
+	}
+	
+	@Override
+	public void uniform3f(int location, float v0, float v1, float v2) {
+		GL20.glUniform3f(location, v0, v1, v2);
+	}
+
+	@Override
+	public void uniform4f(int location, float v0, float v1, float v2, float v3) {
+		GL20.glUniform4f(location, v0, v1, v2, v3);
+	}
+
+	@Override
+	public void uniform1i(int location, int v0) {
+		GL20.glUniform1i(location, v0);
+	}
+
+	@Override
+	public void uniform2i(int location, int v0, int v1) {
+		GL20.glUniform2i(location, v0, v1);
+	}
+
+	@Override
+	public void uniform3i(int location, int v0, int v1, int v2) {
+		GL20.glUniform3i(location, v0, v1, v2);
+	}
+
+	@Override
+	public void uniform4i(int location, int v0, int v1, int v2, int v3) {
+		GL20.glUniform4i(location, v0, v1, v2, v3);
+	}
+	
+	@Override
+	public void uniformMatrix4fv(int location, boolean transpose, FloatBuffer value) {
+		GL20.glUniformMatrix4(location, transpose, value);
+	}
+	
+	@Override
 	public int getUniformLocation(int program, String name) {
 		return GL20.glGetUniformLocation(program, name);
 	}
@@ -308,6 +374,11 @@ public final class LWJGL implements GL {
 	}
 
 	@Override
+	public void bindTextureUnit(int unit, int texture) {
+		GL45.glBindTextureUnit(unit, texture);
+	}
+
+	@Override
 	public void bindTextures(int first, int count, IntBuffer textures) {
 		GL44.glBindTextures(first, count, textures);
 	}
@@ -411,6 +482,11 @@ public final class LWJGL implements GL {
 	public void compileShader(int shader) {
 		GL20.glCompileShader(shader);
 	}
+	
+	@Override
+	public int getShaderi(int shader, int pname) {
+		return GL20.glGetShaderi(shader, pname);
+	}
 
 	@Override
 	public String getShaderInfoLog(int shader) {
@@ -435,6 +511,16 @@ public final class LWJGL implements GL {
 	@Override
 	public void validateProgram(int program) {
 		GL20.glValidateProgram(program);
+	}
+
+	@Override
+	public int getProgrami(int program, int pname) {
+		return GL20.glGetProgrami(program, pname);
+	}
+	
+	@Override
+	public String getProgramInfoLog(int program) {
+		return GL20.glGetProgramInfoLog(program, 8192);
 	}
 
 	@Override

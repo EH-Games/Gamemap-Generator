@@ -10,22 +10,44 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.GL40;
+import org.lwjgl.opengl.GL41;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GL44;
 import org.lwjgl.opengl.KHRTextureCompressionAstcLdr;
 
 public interface GL {
+	public static final int	FALSE										= 0;
+	public static final int	TRUE										= 1;
+	
+	public static final int NEVER										= 0x200;	// GL11.GL_NEVER;
+	public static final int LESS										= 0x201;	// GL11.GL_LESS;
+	public static final int	EQUAL										= 0x202;	// GL11.GL_EQUAL;
+	public static final int LEQUAL										= 0x203;	// GL11.GL_LEQUAL;
+	public static final int GREATER										= 0x204;	// GL11.GL_GREATER;
+	public static final int	NOTEQUAL									= 0x205;	// GL11.GL_NOTEQUAL;
+	public static final int	GEQUAL										= 0x206;	// GL11.GL_GEQUAL;
+	public static final int ALWAYS										= 0x207;	// GL11.GL_ALWAYS;
+	
 	public static final int	POINTS										= 0;		// GL11.GL_POINTS;
 	public static final int	LINES										= 1;		// GL11.GL_LINES;
 	public static final int	LINE_LOOP									= 2;		// GL11.GL_LINE_LOOP;
 	public static final int	LINE_STRIP									= 3;		// GL11.GL_LINE_STRIP;
 	public static final int	TRIANGLES									= 4;		// GL11.GL_TRIANGLES;
 	public static final int	TRIANGLE_STRIP								= 5;		// GL11.GL_TRIANGLE_STRIP;
+	
+	public static final int PRIMITIVE_RESTART							= 0x8F9D;	// GL31.GL_PRIMITIVE_RESTART;
+	public static final int	PRIMITIVE_RESTART_INDEX						= 0x8F9E;	// GL31.GL_PRIMITIVE_RESTART_INDEX;
 
 	public static final int	CULL_FACE									= 0xB44;
 	public static final int	DEPTH_TEST									= 0xB71;	// GL11.GL_DEPTH_TEST;
+	public static final int	ALPHA_TEST									= 0xBC0;	// GL11.GL_ALPHA_TEST;
 
 	public static final int	MODELVIEW									= 0x1700;	// GL11.GL_MODELVIEW;
 	public static final int	PROJECTION									= 0x1701;	// GL11.GL_PROJECTION;
@@ -193,10 +215,37 @@ public interface GL {
 	public static final int	UNSIGNED_INT_8_8_8_8_REV					= 0x8367;
 	public static final int	UNSIGNED_INT_10F_11F_11F_REV				= 0x8C3B;	// GL30.GL_UNSIGNED_INT_10F_11F_11F_REV;
 
+	public static final int PROGRAM_BINARY_LENGTH						= 0x87F1;	// GL41.GL_PROGRAM_BINARY_LENGTH;
+	public static final int	PROGRAM_BINARY_FORMATS						= 0x87FF;	// GL41.GL_PROGRAM_BINARY_FORMATS;
+	public static final int SHADER_TYPE									= 0x8B4F;	// GL20.GL_SHADER_TYPE;
+	public static final int	DELETE_STATUS								= 0x8B80;	// GL20.GL_DELETE_STATUS;
+	public static final int	COMPILE_STATUS								= 0x8B81;	// GL20.GL_COMPILE_STATUS;
+	public static final int LINK_STATUS									= 0x8B82;	// GL20.GL_LINK_STATUS;
+	public static final int	VALIDATE_STATUS								= 0x8B83;	// GL20.GL_VALIDATE_STATUS;
+	public static final int INFO_LOG_LENGTH								= 0x8B84;	// GL20.GL_INFO_LOG_LENGTH;
+	public static final int	ATTACHED_SHADERS							= 0x8B85;	// GL20.GL_ATTACHED_SHADERS;
+	public static final int ACTIVE_UNIFORMS								= 0x8B86;	// GL20.GL_ACTIVE_UNIFORMS;
+	public static final int ACTIVE_UNIFORM_MAX_LENGTH					= 0x8B87;	// GL20.GL_ACTIVE_UNIFORM_MAX_LENGTH;
+	public static final int SHADER_SOURCE_LENGTH						= 0x8B88;	// GL20.GL_SHADER_SOURCE_LENGTH;
+	public static final int	ACTIVE_ATTRIBUTES							= 0x8B89;	// GL20.GL_ACTIVE_ATTRIBUTES;
+	public static final int ACTIVE_ATTRIBUTE_MAX_LENGTH					= 0x8B8A;	// GL20.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH;
+	public static final int SHADING_LANGUAGE_VERSION					= 0x8B8C;	// GL20.GL_SHADING_LANGUAGE_VERSION;
+	
+	public static final int	FRAGMENT_SHADER								= 0x8B30;	// GL20.GL_FRAGMENT_SHADER;
+	public static final int	VERTEX_SHADER								= 0x8B31;	// GL20.GL_VERTEX_SHADER;
+	public static final int	TESS_EVALUATION_SHADER						= 0x8E87;	// GL40.GL_TESS_EVALUATION_SHADER;
+	public static final int	TESS_CONTROL_SHADER							= 0x8E88;	// GL40.GL_TESS_CONTROL_SHADER;
+	public static final int GEOMETRY_SHADER								= 0x8DD9;	// GL32.GL_GEOMETRY_SHADER;
+	public static final int	COMPUTE_SHADER								= 0x91B9;	// GL43.GL_COMPUTE_SHADER;
+
 	public static final int	NO_ERROR									= 0;		// GL11.GL_NO_ERROR;
 	public static final int	INVALID_ENUM								= 0x500;	// GL11.GL_INVALID_ENUM;
 	public static final int	INVALID_VALUE								= 0x501;	// GL11.GL_INVALID_VALUE;
 	public static final int	INVALID_OPERATION							= 0x502;	// GL11.GL_INVALID_OPERATION;
+	public static final int	STACK_OVERFLOW								= 0x503;	// GL11.GL_STACK_OVERFLOW;
+	public static final int STACK_UNDERFLOW								= 0x504;	// GL11.GL_STACK_UNDERFLOW;
+	public static final int	OUT_OF_MEMORY								= 0x505;	// GL11.GL_OUT_OF_MEMORY;
+	public static final int	INVALID_FRAMEBUFFER_OPERATION				= 0x506;	// GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
 
 	public boolean isCoreProfile();
 
@@ -205,6 +254,14 @@ public interface GL {
 	public int getInteger(int pname);
 	
 	public void getFloatv(int pname, FloatBuffer params);
+	
+	public void depthFunc(int func);
+	
+	public void clearDepth(double depth);
+	
+	public void clearDepthf(float depth);
+	
+	public void alphaFunc(int func, float ref);
 
 	public void begin(int mode);
 	
@@ -263,6 +320,33 @@ public interface GL {
 	public void bindAttribLocation(int program, int index, String name);
 	
 	public int getAttribLocation(int program, String name);
+	
+	public void uniform1f(int location, float v0);
+	
+	public void uniform2f(int location, float v0, float v1);
+	
+	public void uniform3f(int location, float v0, float v1, float v2);
+	
+	public default void uniform3f(int location, Vec3 v) {
+		uniform3f(location, v.x, v.y, v.z);
+	}
+	
+	public void uniform4f(int location, float v0, float v1, float v2, float v3);
+	
+	public void uniform1i(int location, int v0);
+	
+	public void uniform2i(int location, int v0, int v1);
+	
+	public void uniform3i(int location, int v0, int v1, int v2);
+	
+	public void uniform4i(int location, int v0, int v1, int v2, int v3);
+	
+	public default void uniformMatrix4f(int location, boolean transpose, Mat4 value) {
+		value.m.clear();
+		uniformMatrix4fv(location, transpose, value.m);
+	}
+	
+	public void uniformMatrix4fv(int location, boolean transpose, FloatBuffer value);
 	
 	public int getUniformLocation(int program, String name);
 	
@@ -325,6 +409,8 @@ public interface GL {
 	 */
 	public void bindTexture(int target, int texture);
 	
+	public void bindTextureUnit(int unit, int texture);
+	
 	public void bindTextures(int first, int count, IntBuffer textures);
 	
 	public void activeTexture(int texture);
@@ -367,6 +453,8 @@ public interface GL {
 	
 	public void compileShader(int shader);
 	
+	public int getShaderi(int shader, int pname);
+	
 	public String getShaderInfoLog(int shader);
 	
 	public void deleteShader(int shader);
@@ -376,6 +464,10 @@ public interface GL {
 	public void linkProgram(int program);
 	
 	public void validateProgram(int program);
+	
+	public int getProgrami(int program, int pname);
+	
+	public String getProgramInfoLog(int program);
 	
 	public void useProgram(int program);
 	

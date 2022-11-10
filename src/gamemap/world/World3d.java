@@ -26,7 +26,7 @@ public final class World3d extends World {
 			root.testVisibility2d(camera);
 		}
 		
-		RenderState state = new RenderState(gl, false, camera);
+		RenderState state = new RenderState(gl, false, camera, this);
 		if(userSetup != null) {
 			state.globalBounds = root.bounds;
 			userSetup.call(state);
@@ -37,7 +37,7 @@ public final class World3d extends World {
 			root.render(state);
 		}
 		Object userData = state.userData;
-		state = new RenderState(gl, true, camera);
+		state = new RenderState(gl, true, camera, this);
 		state.userData = userData;
 		for(int layer = firstLayer; layer <= lastLayer; layer++) {
 			camera.layerFlag = 1 << firstLayer;
