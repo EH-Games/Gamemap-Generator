@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
+import gamemap.types.MapInfo;
 import gamemap.world.World;
 
 public interface Plugin {
@@ -44,4 +45,10 @@ public interface Plugin {
 	 * @see #getWorldList(File)
 	 */
 	public World loadWorld(File file, String worldName);
+	
+	/**
+	 * Allows a plugin to fill in any additional details that will be written to json on export.
+	 * @param info The data that will be written to a file named "map.json"
+	 */
+	public default void modifyBeforeWrite(MapInfo info) {}
 }

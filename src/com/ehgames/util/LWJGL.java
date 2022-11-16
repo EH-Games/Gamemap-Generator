@@ -252,6 +252,21 @@ public final class LWJGL implements GL {
 	public int getUniformLocation(int program, String name) {
 		return GL20.glGetUniformLocation(program, name);
 	}
+
+	@Override
+	public void cullFace(int mode) {
+		GL11.glCullFace(mode);
+	}
+
+	@Override
+	public void frontFace(int mode) {
+		GL11.glFrontFace(mode);
+	}
+
+	@Override
+	public void polygonMode(int face, int mode) {
+		GL11.glPolygonMode(face, mode);
+	}
 	
 	@Override
 	public void enable(int cap) {
@@ -331,6 +346,11 @@ public final class LWJGL implements GL {
 	@Override
 	public void rotated(double angle, double x, double y, double z) {
 		GL11.glRotated(angle, x, y, z);
+	}
+
+	@Override
+	public void ortho(double left, double right, double bottom, double top, double nearVal, double farVal) {
+		GL11.glOrtho(left, right, bottom, top, nearVal, farVal);
 	}
 
 	@Override

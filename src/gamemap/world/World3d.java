@@ -1,6 +1,7 @@
 package gamemap.world;
 
 import com.ehgames.util.GL;
+import com.ehgames.util.Vec3;
 
 import gamemap.RenderCall;
 
@@ -11,6 +12,8 @@ public final class World3d extends World {
 	public int				lastLayer				= 0;
 
 	public double			preferredUnitsPerPixel	= 1;
+	/** background color of the viewport when not in topdown view */
+	public final Vec3		skyColor				= new Vec3();
 
 	/**
 	 * A user supplied method to perform global OpenGL rendering setup

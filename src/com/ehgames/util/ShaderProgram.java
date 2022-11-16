@@ -143,4 +143,16 @@ public class ShaderProgram {
 			}
 		}
 	}
+	
+	/**
+	 * Creates a clone of this ShaderProgram for use in another thread.
+	 */
+	@Override
+	public ShaderProgram clone() {
+		ShaderProgram clone = new ShaderProgram();
+		for(AttachedShader shader : shaders.values()) {
+			clone.attach(shader.shader);
+		}
+		return clone;
+	}
 }

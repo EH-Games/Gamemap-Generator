@@ -4,24 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import org.lwjgl.opengl.EXTTextureCompressionS3TC;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL21;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL31;
-import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL33;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.opengl.GL41;
-import org.lwjgl.opengl.GL43;
-import org.lwjgl.opengl.GL44;
-import org.lwjgl.opengl.KHRTextureCompressionAstcLdr;
-
 public interface GL {
 	public static final int	FALSE										= 0;
 	public static final int	TRUE										= 1;
@@ -41,6 +23,15 @@ public interface GL {
 	public static final int	LINE_STRIP									= 3;		// GL11.GL_LINE_STRIP;
 	public static final int	TRIANGLES									= 4;		// GL11.GL_TRIANGLES;
 	public static final int	TRIANGLE_STRIP								= 5;		// GL11.GL_TRIANGLE_STRIP;
+	
+	public static final int CW											= 0x900;	// GL11.GL_CW;
+	public static final int CCW											= 0x901;	// GL11.GL_CCW;
+	public static final int FRONT										= 0x404;	// GL11.GL_FRONT;
+	public static final int BACK										= 0x405;	// GL11.GL_BACK;
+	public static final int	FRONT_AND_BACK								= 0x408;	// GL11.GL_FRONT_AND_BACK;
+	public static final int POINT										= 0x1B00;	// GL11.GL_POINT;
+	public static final int LINE										= 0x1B01;	// GL11.GL_LINE;
+	public static final int FILL										= 0x1B02;	// GL11.GL_FILL;
 	
 	public static final int PRIMITIVE_RESTART							= 0x8F9D;	// GL31.GL_PRIMITIVE_RESTART;
 	public static final int	PRIMITIVE_RESTART_INDEX						= 0x8F9E;	// GL31.GL_PRIMITIVE_RESTART_INDEX;
@@ -368,15 +359,28 @@ public interface GL {
 	
 	public void multMatrixf(FloatBuffer matrix);
 	
+	public default void multMatrixf(Mat4 matrix) {
+		matrix.m.clear();
+		multMatrixf(matrix.m);
+	}
+	
 	public void loadMatrixf(FloatBuffer matrix);
+	
+	public default void loadMatrixf(Mat4 matrix) {
+		matrix.m.clear();
+		loadMatrixf(matrix.m);
+	}
 	
 	public void loadIdentity();
 	
 	public void matrixMode(int mode);
 	
+	public void ortho(double left, double right, double bottom, double top, double nearVal, double farVal);
+	
 	/**
 	 * 
-	 * @param mode Specifies what kind of primitives to render. Symbolic constants POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, and TRIANGLES are accepted. 
+	 * @param mode Specifies what kind of primitives to render.
+	 * Symbolic constants POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, and TRIANGLES are accepted. 
 	 * @param first Specifies the starting index in the enabled arrays.
 	 * @param count Specifies the number of indices to be rendered.
 	 */
@@ -385,6 +389,12 @@ public interface GL {
 	public void drawElements(int mode, int count, int type, ByteBuffer indices);
 	
 	public void drawElements(int mode, int count, int type, int offset);
+	
+	public void cullFace(int mode);
+	
+	public void frontFace(int mode);
+	
+	public void polygonMode(int face, int mode);
 	
 	public void enable(int cap);
 	
@@ -404,7 +414,8 @@ public interface GL {
 	
 	/**
 	 * 
-	 * @param target Specifies the target to which the texture is bound. Must be either TEXTURE_1D, TEXTURE_2D, TEXTURE_3D, or TEXTURE_CUBE_MAP.
+	 * @param target Specifies the target to which the texture is bound.
+	 * Must be either TEXTURE_1D, TEXTURE_2D, TEXTURE_3D, or TEXTURE_CUBE_MAP.
 	 * @param texture Specifies the name of a texture.
 	 */
 	public void bindTexture(int target, int texture);

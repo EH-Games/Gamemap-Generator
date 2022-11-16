@@ -5,8 +5,10 @@ import org.lwjgl.opengl.AWTGLCanvas;
 
 import com.ehgames.util.GL;
 import com.ehgames.util.LWJGL;
+import com.ehgames.util.Vec3;
 
 import gamemap.world.World;
+import gamemap.world.World3d;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -52,7 +54,11 @@ class GMCanvas extends AWTGLCanvas {
 		
 		World world = Gamemap.activeWorld;
 		if(world != null) {
-			glClearColor(world.backgroundColor.x, world.backgroundColor.y, world.backgroundColor.z, 1);
+			Vec3 bgColor = world.backgroundColor;
+			if(Gamemap.camera.isPerspective() && world.getClass() == World3d.class) {
+				bgColor = ((World3d) world).skyColor;
+			}
+			glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			world.render(Gamemap.camera, gl);
 			if(world != lastWorld) {

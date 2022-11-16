@@ -4,6 +4,12 @@ public class AABB {
 	public final Vec3 min = new Vec3();
 	public final Vec3 max = new Vec3();
 	
+	public AABB() {}
+	
+	public AABB(Vec3 min, Vec3 max) {
+		set(min, max);
+	}
+
 	public void revalidate() {
 		if(min.x > max.x) {
 			float tmp = min.x;

@@ -4,10 +4,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.File;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -43,6 +44,8 @@ public class Gamemap {
 	private static int						zoomLevel		= 0;
 	static Camera							camera			= new Camera();
 	static World							activeWorld		= null;
+	/** the plugin used to load the currently active world. used for exporting */
+	static Plugin							lastUsedPlugin	= null;
 
 	private static Map<FileFilter, Plugin>	pluginsByFilter	= new HashMap<>();
 	private static JFileChooser				fileChooser;
@@ -53,6 +56,8 @@ public class Gamemap {
 
 	private static int						mouseX, mouseY;
 
+	private static DecimalFormat			numFormat		= new DecimalFormat("0.##");
+
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -61,6 +66,8 @@ public class Gamemap {
 		
 		// needs to come here so it gets l&f set
 		fileChooser = new JFileChooser();
+
+		numFormat.setRoundingMode(RoundingMode.DOWN);
 		
 		loadConfig();
 		loadPlugins();
@@ -160,6 +167,7 @@ public class Gamemap {
 			
 			total.scaleInPlace(speed);
 			camera.move(total);
+			updateFPSCoordinates();
 		}
 	}
 	
@@ -215,6 +223,26 @@ public class Gamemap {
 		itemOpen.setEnabled(!locked);
 		itemExport.setEnabled(!locked);
 	}
+	
+	private static void updateMouseCoordinates() {
+		Vec3 pos = camera.getPosition();
+		double s = camera.getScale();
+		double x = (mouseX - canvas.getWidth() * 0.5) / s + pos.x;
+		double y = (canvas.getHeight() * 0.5 - mouseY) / s + pos.y;
+		if(activeWorld.positiveYIsDown) y = -y;
+		StringBuilder sb = new StringBuilder(APP_NAME).append(" - (");
+		sb.append(numFormat.format(x)).append(", ").append(numFormat.format(y)).append(')');
+		frame.setTitle(sb.toString());
+	}
+	
+	private static void updateFPSCoordinates() {
+		Vec3 pos = camera.getPosition();
+		float y = activeWorld.positiveYIsDown ? -pos.y : pos.y;
+		StringBuilder sb = new StringBuilder(APP_NAME).append(" - (");
+		sb.append(numFormat.format(pos.x)).append(", ").append(numFormat.format(y));
+		sb.append(", ").append(numFormat.format(pos.z)).append(')');
+		frame.setTitle(sb.toString());
+	}
 
 	private static Frame createFrame() throws LWJGLException {
 		Frame frame = new Frame();
@@ -243,8 +271,9 @@ public class Gamemap {
 				} else {
 					camera.setZoomLevel(--zoomLevel);
 				}
+				updateMouseCoordinates();
+				canvas.repaint();
 			}
-			canvas.repaint();
 		});
 		canvas.addMouseListener(new MouseAdapter() {
 			@Override
@@ -256,12 +285,31 @@ public class Gamemap {
 				} else if(btn == MouseEvent.BUTTON3) {
 					if(activeWorld != null) {
 						camera.onWorldChange(activeWorld);
+						if(!camera.isPerspective()) {
+							updateMouseCoordinates();
+						}
 						canvas.repaint();
 					}
 				}
 			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				if(!camera.isPerspective()) {
+					frame.setTitle(APP_NAME);
+				}
+			}
 		});
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				mouseX = e.getX();
+				mouseY = e.getY();
+				if(activeWorld != null && !camera.isPerspective()) {
+					updateMouseCoordinates();
+				}
+			}
+			
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				if((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
@@ -326,6 +374,7 @@ public class Gamemap {
 					val.scaleInPlace(speed);
 				}
 				camera.move(val);
+				updateFPSCoordinates();
 				canvas.repaint();
 			}
 			
@@ -371,6 +420,11 @@ public class Gamemap {
 		CheckboxMenuItem ortho = new CheckboxMenuItem("Topdown View", !camera.isPerspective());
 		ortho.addItemListener(e -> {
 			camera.setPerspective(!ortho.getState());
+			if(camera.isPerspective()) {
+				updateFPSCoordinates();
+			} else {
+				frame.setTitle(APP_NAME);
+			}
 			canvas.repaint();
 		});
 		view.add(ortho);
@@ -444,6 +498,7 @@ public class Gamemap {
 										"No Gameworld", JOptionPane.ERROR_MESSAGE);
 							} else {
 								camera.onWorldChange(world);
+								lastUsedPlugin = worlds.plugin;
 								activeWorld = world;
 								if(!canvas.activeRendering) canvas.repaint();
 							}

@@ -50,10 +50,10 @@ public class RenderState {
 	private void drawXAt(float x, float y, float scale) {
 		x = 50 + (camera.position.x - globalBounds.min.x) * scale;
 		y = 50 + (globalBounds.max.y - camera.position.y) * scale;
-		glVertex2f(x - 3, y - 3);
-		glVertex2f(x + 3, y + 3);
-		glVertex2f(x - 3, y + 3);
-		glVertex2f(x + 3, y - 3);
+		gl.vertex2f(x - 3, y - 3);
+		gl.vertex2f(x + 3, y + 3);
+		gl.vertex2f(x - 3, y + 3);
+		gl.vertex2f(x + 3, y - 3);
 	}
 	
 	private void drawXAt(Vec3 v, float scale) {
@@ -62,16 +62,15 @@ public class RenderState {
 	
 	private void drawCullingInfo() {
 		// setup
-		glDisable(GL_TEXTURE_2D);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0, 1280, 720, 0, -1, 1);
+		gl.disable(GL.TEXTURE_2D);
+		gl.pushMatrix();
+		gl.loadIdentity();
+		gl.matrixMode(GL_PROJECTION);
+		gl.pushMatrix();
+		gl.loadIdentity();
+		gl.ortho(0, 1280, 720, 0, -1, 1);
 		
-		
-		glBegin(GL_LINES);
+		gl.begin(GL.LINES);
 		// boundaries of all content
 		float left = 50;
 		float top = 50;
@@ -80,32 +79,32 @@ public class RenderState {
 		float scale = 500 / height;
 		float btm = top + height * scale;
 		float right = left + width * scale;
-		glColor3f(1, 0, 0);
-		glVertex2f(left, top);
-		glVertex2f(left, btm);
-		glVertex2f(left, btm);
-		glVertex2f(right, btm);
-		glVertex2f(right, btm);
-		glVertex2f(right, top);
-		glVertex2f(right, top);
-		glVertex2f(left, top);
+		gl.color3f(1, 0, 0);
+		gl.vertex2f(left, top);
+		gl.vertex2f(left, btm);
+		gl.vertex2f(left, btm);
+		gl.vertex2f(right, btm);
+		gl.vertex2f(right, btm);
+		gl.vertex2f(right, top);
+		gl.vertex2f(right, top);
+		gl.vertex2f(left, top);
 		
 		// boundaries of frustum
-		glColor3f(0, 1, 0);
+		gl.color3f(0, 1, 0);
 		width = camera.bounds.getWidth();
 		height = camera.bounds.getHeight();
 		left = 50 + (camera.bounds.min.x - globalBounds.min.x) * scale;
 		right = left + width * scale;
 		top = 50 + (globalBounds.max.y - camera.bounds.max.y) * scale;
 		btm = top + height * scale;
-		glVertex2f(left, top);
-		glVertex2f(left, btm);
-		glVertex2f(left, btm);
-		glVertex2f(right, btm);
-		glVertex2f(right, btm);
-		glVertex2f(right, top);
-		glVertex2f(right, top);
-		glVertex2f(left, top);
+		gl.vertex2f(left, top);
+		gl.vertex2f(left, btm);
+		gl.vertex2f(left, btm);
+		gl.vertex2f(right, btm);
+		gl.vertex2f(right, btm);
+		gl.vertex2f(right, top);
+		gl.vertex2f(right, top);
+		gl.vertex2f(left, top);
 
 		// frustum points
 		/*
@@ -116,38 +115,41 @@ public class RenderState {
 		//*/
 		
 		// camera position
-		glColor3f(1, 1, 1);
+		gl.color3f(1, 1, 1);
 		drawXAt(camera.position, scale);
-		glEnd();
+		gl.end();
 		
 		// cleanup
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-		glEnable(GL_TEXTURE_2D);
+		gl.popMatrix();
+		gl.matrixMode(GL.MODELVIEW);
+		gl.popMatrix();
+		gl.enable(GL.TEXTURE_2D);
 	}
 	
 	public void applyCameraFixedFunc() {
 		gl.useProgram(0);
 		
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrix(camera.projection.m);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrix(camera.view.m);
+		gl.matrixMode(GL.PROJECTION);
+		gl.loadMatrixf(camera.projection);
+		gl.matrixMode(GL.MODELVIEW);
+		gl.loadMatrixf(camera.view);
 
 		// makes isometric
-//		glRotatef(-45, 1, 0, 0);
-//		glRotatef(45, 0, 0, 1);
+//		gl.rotatef(-45, 1, 0, 0);
+//		gl.rotatef(45, 0, 0, 1);
 		
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		glClearDepth(1);
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0);
+		gl.enable(GL.CULL_FACE);
+		gl.enable(GL.DEPTH_TEST);
+		gl.depthFunc(GL.LEQUAL);
+		gl.clearDepth(1);
+		gl.enable(GL.ALPHA_TEST);
+		gl.alphaFunc(GL.GREATER, 0);
+		gl.activeTexture(GL.TEXTURE0 + 1);
+		gl.disable(GL.TEXTURE_2D);
 		gl.activeTexture(GL.TEXTURE0);
-		//glPolygonMode(GL_FRONT, GL_FILL);
-		//glPolygonMode(GL_BACK, GL_LINE);
+		gl.color3f(1, 1, 1);
+		gl.polygonMode(GL.FRONT, GL.FILL);
+		gl.polygonMode(GL.BACK, GL.LINE);
 		
 		//drawCulling = false;
 		if(camera.perspective && drawCulling) {

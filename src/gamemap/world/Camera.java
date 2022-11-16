@@ -196,6 +196,10 @@ public class Camera {
 	public double getScale() {
 		return pixelsPerUnit;
 	}
+	
+	public Vec3 getPosition() {
+		return position;
+	}
 
 	public void copyWorldProperties(Camera camera) {
 		areaFlag = camera.areaFlag;

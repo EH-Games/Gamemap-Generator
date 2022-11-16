@@ -1,10 +1,10 @@
 package gamemap;
 
-import com.ehgames.util.GL;
+import com.ehgames.util.GLDestructable;
 
 import gamemap.world.RenderState;
 
-public interface ObjectRenderer {
+public interface ObjectRenderer extends GLDestructable {
 	/**
 	 * Indicates that parts of this renderer have translucency
 	 * or have bitmask transparency with linear filtering
@@ -40,10 +40,4 @@ public interface ObjectRenderer {
 	}
 	
 	public void render(RenderState state);
-	
-	/**
-	 * Called when the world is destroyed so that renderers can free any allocated resources.
-	 * @param gl the relevant OpenGL context
-	 */
-	public default void destroyResources(GL gl) {}
 }

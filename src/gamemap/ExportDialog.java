@@ -8,8 +8,13 @@ import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,16 +23,23 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import javax.swing.text.NumberFormatter;
 
 import org.lwjgl.LWJGLException;
 
+import com.ehgames.util.Vec3;
+import com.google.gson.Gson;
+
+import gamemap.types.MapInfo;
+import gamemap.types.MapView;
+import gamemap.types.MapViewRenderer;
 import gamemap.world.World;
 import gamemap.world.World3d;
 
 public class ExportDialog extends Dialog {
 	private static final String	INVALID_PATH_CHARS	= "\\/:*?\"<>|";
 	private static final int	MARGIN_SIZE			= 8;
-
+	
 	private static JPanel makeTable(String title, JComponent... items) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
@@ -61,24 +73,25 @@ public class ExportDialog extends Dialog {
 		
 		return panel;
 	}
-	
+
+	private NumberFormatter		formatter		= new NumberFormatter(new DecimalFormat("#.###"));
 	private SpinnerNumberModel	threadCountMdl	= new SpinnerNumberModel(2, 1, 4, 1);
 	private JSpinner			threadCountSel	= new JSpinner(threadCountMdl);
 	private JTextField			friendlyName	= new JTextField(12);
 	private JTextField			mapId			= new JTextField(12);
-	private JFormattedTextField	unitsPerPixel	= new JFormattedTextField();
-	private JFormattedTextField	dstFolderEntry	= new JFormattedTextField();
+	private JFormattedTextField	unitsPerPixel	= new JFormattedTextField(formatter);
+	private JTextField			dstFolderEntry	= new JTextField(12);
 	private String				dstFolderName;
 	private File				dstFolder;
-	private JFormattedTextField	minXEntry		= new JFormattedTextField();
-	private JFormattedTextField	minYEntry		= new JFormattedTextField();
-	private JFormattedTextField	maxXEntry		= new JFormattedTextField();
-	private JFormattedTextField	maxYEntry		= new JFormattedTextField();
+	private JFormattedTextField	minXEntry		= new JFormattedTextField(formatter);
+	private JFormattedTextField	minYEntry		= new JFormattedTextField(formatter);
+	private JFormattedTextField	maxXEntry		= new JFormattedTextField(formatter);
+	private JFormattedTextField	maxYEntry		= new JFormattedTextField(formatter);
 	private JCheckBox			adjustBounds	= new JCheckBox("Adjust bounds to pixels", true);
 	private double				minX, minY;
 	private double				maxX, maxY;
 	private double				width, height;
-	
+
 	private World				lastWorld;
 	private boolean				is3d;
 
@@ -256,19 +269,87 @@ public class ExportDialog extends Dialog {
 		setVisible(true);
 	}
 	
+	private static String colorToString(Vec3 color) {
+		// assuming colors are already in range. shame on you if they aren't
+		int r = Math.round(color.x * 255);
+		int g = Math.round(color.y * 255);
+		int b = Math.round(color.z * 255);
+		return String.format("#%02X%02X%02X", r, g, b);
+	}
+	
+	private void exportMetadata() {
+		World world = Gamemap.activeWorld;
+		
+		MapInfo info = new MapInfo();
+		info.usermap = world.mapId;
+		// might need to be /= once we have a map that utilizes it to test with
+		info.axes.x *= world.worldUnitsPerMapUnit;
+		info.axes.y *= world.worldUnitsPerMapUnit;
+		
+		MapView view = info.views[0];
+		view.name = world.friendlyName;
+		view.bg_color = colorToString(world.backgroundColor);
+		
+		MapViewRenderer renderer = view.items[0];
+		renderer.origin.x = (float) minX;
+		// XXX Y might need extra handling for flipping
+		renderer.size.width = (float) (maxX - minX);
+		renderer.size.height = (float) (maxY - minY);
+
+		// gamemap generator's renderer always uses Y up coordinates internally
+		// gamemap uses the specified coordinates but translates to
+		// Y down coordinates for the renderer on the fly
+		// for a naturally Y up map, we want...
+		//		height to be negative
+		//		origin to be maxY
+		//		scale to be negative
+		// for a naturally Y down map, we want...
+		//		height to be positive
+		//		origin to be negative maxY
+		//		scale to be positive
+		if(world.positiveYIsDown) {
+			renderer.origin.y = (float) -maxY;
+		} else {
+			renderer.size.height = -renderer.size.height;
+			renderer.origin.y = (float) maxY;
+			info.axes.y = -info.axes.y;
+		}
+		
+		Plugin plugin = Gamemap.lastUsedPlugin;
+		if(plugin != null) plugin.modifyBeforeWrite(info);
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(info);
+		File metaFile = new File(dstFolder, "map.json");
+		try {
+			Files.write(metaFile.toPath(), json.getBytes(StandardCharsets.UTF_8));
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void exportTiles() {
 		// TODO implement
+		exportMetadata();
 	}
 	
 	private void export3d() {
 		// attempt to force finalize to be called on any old Cameras to release their flags
 		System.gc();
 		
+//		System.out.println("-- Pre adjustment --");
+//		System.out.println("Width=" + width + ", height=" + height);
+//		System.out.println("X range: " + minX + " - " + maxX);
+//		System.out.println("Y range: " + minY + " - " + maxY);
 		double upp = ((Number) unitsPerPixel.getValue()).doubleValue();
+		System.out.println(upp + " units per pixel");
 		double pwd = width / upp;
 		double phd = height / upp;
+		System.out.println("Raw size: " + pwd + " x " + phd);
 		int pixelWidth = (int) Math.ceil(pwd);
 		int pixelHeight = (int) Math.ceil(phd);
+		System.out.println(pixelWidth + "x" + pixelHeight);
+//		System.out.println("-- Post adjustment --");
 		if(adjustBounds.isSelected()) {
 			if(minX < 0 && maxX > 0) {
 				// adjust min and max, keeping origin at a pixel boundary
@@ -303,6 +384,10 @@ public class ExportDialog extends Dialog {
 				}
 			}
 		}
+//		System.out.println("X range: " + minX + " - " + maxX);
+//		System.out.println("Y range: " + minY + " - " + maxY);
+//		System.out.println("Raw size: " + pwd + " x " + phd);
+		exportMetadata();
 		System.out.println("Exporting image of size " + pixelWidth + "x" + pixelHeight);
 		
 		int pwTask = pixelWidth;
@@ -427,7 +512,7 @@ public class ExportDialog extends Dialog {
 	
 	// try to automatically pngcrush the resulting image to reduce file size
 	private void attemptPNGCrush() {
-		
+		// TODO find a local copy of pngcrush or try to run anyways in case its in the path
 	}
 	
 	private void onExportFinished() {
