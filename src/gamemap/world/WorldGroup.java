@@ -39,7 +39,7 @@ public final class WorldGroup extends WorldItem {
 
 	@Override
 	public void testVisibility(Camera camera) {
-		if(camera.bounds.intersects(bounds)) {
+		if(camera.testVisibility(bounds)) {
 			visibilityFlags |= camera.cameraFlag;
 			for(WorldItem obj : objects) {
 				obj.testVisibility(camera);

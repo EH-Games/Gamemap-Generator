@@ -48,19 +48,27 @@ public class RenderState {
 	}
 	
 	private void drawXAt(float x, float y, float scale) {
-		x = 50 + (camera.position.x - globalBounds.min.x) * scale;
-		y = 50 + (globalBounds.max.y - camera.position.y) * scale;
+		x = 50 + (x - globalBounds.min.x) * scale;
+		y = 50 + (globalBounds.max.y - y) * scale;
 		gl.vertex2f(x - 3, y - 3);
 		gl.vertex2f(x + 3, y + 3);
 		gl.vertex2f(x - 3, y + 3);
 		gl.vertex2f(x + 3, y - 3);
 	}
 	
+	//*
+	private void drawPointAt(Vec3 v, float scale) {
+		float x = 50 + (v.x - globalBounds.min.x) * scale;
+		float y = 50 + (globalBounds.max.y - v.y) * scale;
+		gl.vertex2f(x, y);
+	}
+	//*/
+	
 	private void drawXAt(Vec3 v, float scale) {
 		drawXAt(v.x, v.y, scale);
 	}
 	
-	private void drawCullingInfo() {
+	private void drawCullingInfoImpl() {
 		// setup
 		gl.disable(GL.TEXTURE_2D);
 		gl.pushMatrix();
@@ -106,13 +114,26 @@ public class RenderState {
 		gl.vertex2f(right, top);
 		gl.vertex2f(left, top);
 
-		// frustum points
-		/*
-		glColor3f(1, 1, 0);
-		for(Vec3 v : camera.frustumPoints) {
-			drawXAt(v, scale);
+		// frustum itself
+		if(camera.perspective) {
+			glColor3f(1, 1, 0);
+			drawPointAt(camera.fpWorld[7], scale);
+			drawPointAt(camera.fpWorld[4], scale);
+			drawPointAt(camera.fpWorld[0], scale);
+			drawPointAt(camera.fpWorld[4], scale);
+			drawPointAt(camera.fpWorld[3], scale);
+			drawPointAt(camera.fpWorld[7], scale);
+			drawPointAt(camera.fpWorld[1], scale);
+			drawPointAt(camera.fpWorld[5], scale);
+			drawPointAt(camera.fpWorld[2], scale);
+			drawPointAt(camera.fpWorld[6], scale);
+			drawPointAt(camera.fpWorld[6], scale);
+			drawPointAt(camera.fpWorld[7], scale);
+			drawPointAt(camera.fpWorld[4], scale);
+			drawPointAt(camera.fpWorld[5], scale);
+			drawPointAt(camera.fpWorld[5], scale);
+			drawPointAt(camera.fpWorld[6], scale);
 		}
-		//*/
 		
 		// camera position
 		gl.color3f(1, 1, 1);
@@ -148,12 +169,22 @@ public class RenderState {
 		gl.disable(GL.TEXTURE_2D);
 		gl.activeTexture(GL.TEXTURE0);
 		gl.color3f(1, 1, 1);
-		gl.polygonMode(GL.FRONT, GL.FILL);
-		gl.polygonMode(GL.BACK, GL.LINE);
+//		gl.polygonMode(GL.FRONT, GL.FILL);
+//		gl.polygonMode(GL.BACK, GL.LINE);
 		
 		//drawCulling = false;
 		if(camera.perspective && drawCulling) {
-			drawCullingInfo();
+			drawCullingInfoImpl();
 		}
+	}
+	
+	public void drawCullingInfo() {
+		gl.useProgram(0);
+		gl.activeTexture(GL.TEXTURE0 + 1);
+		gl.disable(GL.TEXTURE_2D);
+		gl.activeTexture(GL.TEXTURE0);
+		gl.disable(GL.TEXTURE_2D);
+		drawCullingInfoImpl();
+		gl.enable(GL.TEXTURE_2D);
 	}
 }

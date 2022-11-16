@@ -60,6 +60,48 @@ public class Vec3 {
 		return (float) Math.sqrt(distSq);
 	}
 	
+	public float magnitudeSq() {
+		// technically the dot product of itself and itself
+		return x * x + y * y + z * z;
+	}
+	
+	public float magnitude() {
+		float mag = magnitudeSq();
+		return mag == 0 ? 0 : (float) Math.sqrt(mag);
+	}
+	
+	public Vec3 normalize() {
+		Vec3 out = new Vec3();
+		normalize(out);
+		return out;
+	}
+	
+	public Vec3 normalizeInPlace() {
+		normalize(this);
+		return this;
+	}
+	
+	public void normalize(Vec3 out) {
+		float mag = magnitude();
+		div(mag, out);
+	}
+	
+	public Vec3 cross(Vec3 v) {
+		Vec3 out = new Vec3();
+		cross(v, out);
+		return out;
+	}
+	
+	public void cross(Vec3 v, Vec3 out) {
+		out.x = y * v.z - z * v.y;
+		out.y = z * v.x - x * v.z;
+		out.z = x * v.y - y * v.x;
+	}
+	
+	public float dot(Vec3 v) {
+		return x * v.x + y * v.y + z * v.z;
+	}
+	
 	public Vec3 add(Vec3 v) {
 		return new Vec3(x + v.x, y + v.y, z + v.z);
 	}
@@ -79,6 +121,25 @@ public class Vec3 {
 		out.set(x + in.x, y + in.y, z + in.z);
 	}
 	
+	public Vec3 sub(Vec3 v) {
+		return new Vec3(x - v.x, y - v.y, z - v.z);
+	}
+	
+	public Vec3 subInPlace(Vec3 v) {
+		return subInPlace(v.x, v.y, v.z);
+	}
+	
+	public Vec3 subInPlace(float x, float y, float z) {
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+		return this;
+	}
+	
+	public void sub(Vec3 in, Vec3 out) {
+		out.set(x - in.x, y - in.y, z - in.z);
+	}
+	
 	public Vec3 scale(float f) {
 		return new Vec3(x * f, y * f, z * f);
 	}
@@ -92,6 +153,30 @@ public class Vec3 {
 	
 	public void scale(float f, Vec3 out) {
 		out.set(x * f, y * f, z * f);
+	}
+	
+	public Vec3 mult(float f) {
+		return scale(f);
+	}
+	
+	public Vec3 multInPlace(float f) {
+		return scaleInPlace(f);
+	}
+	
+	public void mult(float f, Vec3 out) {
+		scale(f, out);
+	}
+	
+	public Vec3 div(float f) {
+		return scale(1 / f);
+	}
+	
+	public Vec3 divInPlace(float f) {
+		return scaleInPlace(1 / f);
+	}
+	
+	public void div(float f, Vec3 out) {
+		scale(f, out);
 	}
 	
 	@Override

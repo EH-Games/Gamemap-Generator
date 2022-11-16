@@ -29,7 +29,7 @@ public class WorldObject extends WorldItem {
 		// area test
 		if((camera.areaFlag & areaFlags) == 0) return false;
 		// aabb test
-		if(!camera.bounds.intersects(bounds)) return false;
+		if(!camera.testVisibility(bounds)) return false;
 		// time test
 		if(maxTime < minTime) {
 			// visible at midnight

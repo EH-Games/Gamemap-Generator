@@ -19,43 +19,50 @@ public class Camera {
 		}
 	}
 
-	final Vec3		position			= new Vec3();
-	final AABB		bounds				= new AABB();
+	final Vec3			position		= new Vec3();
+	final AABB			bounds			= new AABB();
 
-	float			nearClip			= 0.1f;
-	float			farClip				= 1000;
-	float			nearClipSq			= 0.01f;
-	float			farClipSq			= 1000_000;
-	boolean			perspective			= false;
-	float			fovY				= (float) Math.toRadians(80);
+	float				nearClip		= 0.1f;
+	float				farClip			= 1000;
+	float				nearClipSq		= 0.01f;
+	float				farClipSq		= 1000_000;
+	boolean				perspective		= false;
+	float				fovY			= (float) Math.toRadians(80);
 
-	Vec3[]			frustumPoints		= new Vec3[8];
-	Mat4			projection			= new Mat4();
-	Mat4			view				= new Mat4();
-	Mat4			rotation			= new Mat4();
-	Mat4			invRotation			= new Mat4();
+	// the 4 sides + far
+	FrustumPlane[]		frustumPlanes	= new FrustumPlane[5];
+	/** frustum points in view space */
+	private Vec3[]		frustumPoints	= new Vec3[8];
+	/** frustum points in world space */
+	Vec3[]				fpWorld			= new Vec3[8];
+	Mat4				projection		= new Mat4();
+	Mat4				view			= new Mat4();
+	Mat4				rotation		= new Mat4();
+	Mat4				invRotation		= new Mat4();
 
-	double			pixelsPerUnit		= 1;
-	float			halfWidth;
-	float			halfHeight;
-	int				width;
-	int				height;
-	private boolean	rebuildBounds		= true;
+	double				pixelsPerUnit	= 1;
+	float				halfWidth;
+	float				halfHeight;
+	int					width;
+	int					height;
+	private boolean		rebuildBounds	= true;
+
+	private final Vec3	tempVec			= new Vec3();
 
 	/** internal flag used for marking objects as visible */
-	int				cameraFlag;
+	int					cameraFlag;
 
 	/** a single bit indicating which area should be rendered */
-	int				areaFlag;
+	int					areaFlag;
 
 	/** a single bit indicating which layer should be rendered */
-	int				layerFlag;
+	int					layerFlag;
 
-	int				time;
+	int					time;
 
 	/** background threads block until all relevant object renderers are loaded before rendering */
-	final boolean	background;
-	
+	final boolean		background;
+
 	public Camera() {
 		this(false);
 	}
@@ -66,6 +73,10 @@ public class Camera {
 		if(flag != null) cameraFlag = flag;
 		for(int i = 0; i < frustumPoints.length; i++) {
 			frustumPoints[i] = new Vec3();
+			fpWorld[i] = new Vec3();
+		}
+		for(int i = 0; i < frustumPlanes.length; i++) {
+			frustumPlanes[i] = new FrustumPlane();
 		}
 	}
 
@@ -114,6 +125,12 @@ public class Camera {
 		frustumPoints[5].set(-xFar, -yFar, -farClip);
 		frustumPoints[6].set(xFar, -yFar, -farClip);
 		frustumPoints[7].set(xFar, yFar, -farClip);
+		
+		frustumPlanes[0].initSide(frustumPoints[4], frustumPoints[5]); // left
+		frustumPlanes[1].initSide(frustumPoints[6], frustumPoints[7]); // right
+		frustumPlanes[2].initSide(frustumPoints[7], frustumPoints[4]); // top
+		frustumPlanes[3].initSide(frustumPoints[5], frustumPoints[6]); // bottom
+		frustumPlanes[4].initFarClip(farClip);
 	}
 	
 	public Vec3 getViewAxis(int axis, Vec3 out) {
@@ -233,11 +250,14 @@ public class Camera {
 	void calculateBounds() {
 		if(perspective) {
 			bounds.prepForBuild();
-			Vec3 transformed = new Vec3();
-			for(Vec3 fp : frustumPoints) {
-				rotation.transform(fp, transformed);
-				transformed.addInPlace(position);
-				bounds.add(transformed);
+			for(int i = 0; i < 8; i++) {
+				Vec3 v = fpWorld[i];
+				rotation.transform(frustumPoints[i], v);
+				v.addInPlace(position);
+				bounds.add(v);
+			}
+			for(FrustumPlane plane : frustumPlanes) {
+				plane.setWorldSpace(rotation, position);
 			}
 			view.setTranslation(-position.x, -position.y, -position.z);
 			invRotation.mult(view, view);
@@ -256,6 +276,18 @@ public class Camera {
 			projection.setOrtho(-xHalf, xHalf, -yHalf, yHalf, -ORTHO_Z_VAL, ORTHO_Z_VAL);
 			view.setTranslation(-position.x, -position.y, 0);
 		}
+	}
+	
+	boolean occluded(AABB box) {
+		if(!bounds.intersects(box)) return true;
+		for(FrustumPlane plane : frustumPlanes) {
+			if(plane.isOutside(box, tempVec)) return true;
+		}
+		return false;
+	}
+	
+	boolean testVisibility(AABB box) {
+		return !occluded(box);
 	}
 	
 	@Override
